@@ -56,9 +56,45 @@ class ApiSurccursaleController extends ApiInterface
         return $response;
     }
 
+    #[Route('/active/entreprise', methods: ['GET'])]
+    /**
+     * Retourne la liste des surccursales actives d'une entreprise.
+     * 
+     */
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the rewards of an user',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new AttributeModel(type: Surccursale::class, groups: ['full']))
+        )
+    )]
+    #[OA\Tag(name: 'typeMesure')]
+    // #[Security(name: 'Bearer')]
+    public function indexAllActive(SurccursaleRepository $surccursaleRepository): Response
+    {
+        try {
+
+            $surccursales = $surccursaleRepository->findBy(
+                ['entreprise' => $this->getUser()->getEntreprise(),'active' => true],
+                ['id' => 'ASC']
+            );
+
+          
+
+            $response =  $this->responseData($surccursales, 'group1', ['Content-Type' => 'application/json']);
+        } catch (\Exception $exception) {
+            $this->setMessage("");
+            $response = $this->response('[]');
+        }
+
+        // On envoie la réponse
+        return $response;
+    }
+    
     #[Route('/entreprise', methods: ['GET'])]
     /**
-     * Retourne la liste des typeMesures d'une entreprise.
+     * Retourne la liste des surccursales d'une entreprise.
      * 
      */
     #[OA\Response(

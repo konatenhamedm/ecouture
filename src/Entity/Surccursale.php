@@ -40,6 +40,10 @@ class Surccursale
     #[ORM\ManyToOne(inversedBy: 'surccursales')]
     private ?Entreprise $entreprise = null;
 
+    #[ORM\Column(nullable: true)]
+     #[Groups(["group1", "group_type"])]
+    private ?bool $active = true;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -143,6 +147,18 @@ class Surccursale
     public function setEntreprise(?Entreprise $entreprise): static
     {
         $this->entreprise = $entreprise;
+
+        return $this;
+    }
+
+    public function isActive(): ?bool
+    {
+        return $this->active;
+    }
+
+    public function setActive(?bool $active): static
+    {
+        $this->active = $active;
 
         return $this;
     }

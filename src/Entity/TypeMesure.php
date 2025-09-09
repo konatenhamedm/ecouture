@@ -11,6 +11,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Entity(repositoryClass: TypeMesureRepository::class)]
 class TypeMesure
 {use TraitEntity;
+
+    //exemple veste , pantalon,boubou
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -20,8 +22,6 @@ class TypeMesure
     #[ORM\Column(length: 255)]
      #[Groups(["group1", "group_type"])]
     private ?string $libelle = null;
-
-
 
     #[ORM\ManyToOne(inversedBy: 'typeMesures')]
     private ?Entreprise $entreprise = null;

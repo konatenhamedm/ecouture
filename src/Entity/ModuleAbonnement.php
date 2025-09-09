@@ -49,10 +49,10 @@ class ModuleAbonnement
     #[ORM\OneToMany(targetEntity: Abonnement::class, mappedBy: 'moduleAbonnement')]
     private Collection $abonnements;
 
-    #[ORM\Column(length: 255)]
-    private ?string $codeAbonnement = null;
+
 
     #[ORM\Column(length: 255)]
+     #[Groups(["group1", "group_type"])]
     private ?string $code = null;
 
     /**
@@ -181,17 +181,6 @@ class ModuleAbonnement
         return $this;
     }
 
-    public function getCodeAbonnement(): ?string
-    {
-        return $this->codeAbonnement;
-    }
-
-    public function setCodeAbonnement(string $codeAbonnement): static
-    {
-        $this->codeAbonnement = $codeAbonnement;
-
-        return $this;
-    }
 
     public function getCode(): ?string
     {

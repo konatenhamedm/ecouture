@@ -49,6 +49,20 @@ class AbonnementRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult();
     }
+
+    /*         public function findLastTransactionByUser($userId): ?Abonnement
+    {
+        return $this->createQueryBuilder('t')
+            ->andWhere('t.user = :userId')
+            ->andWhere('t.type = :state')
+            ->setParameter('state', "NOUVELLE DEMANDE")
+            ->setParameter('userId', $userId)
+            ->orderBy('t.createdAt', 'DESC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
+    } */
+
     public function findInactiveForEntreprise(Entreprise $entreprise): ?Abonnement
     {
         return $this->createQueryBuilder('a')

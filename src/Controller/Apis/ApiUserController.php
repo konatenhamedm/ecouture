@@ -7,6 +7,8 @@ use App\DTO\UserDTO;
 use App\Entity\Abonnement;
 use App\Entity\Administrateur;
 use App\Entity\Entreprise;
+use App\Entity\LigneModule;
+use App\Entity\ModuleAbonnement;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Entity\User;
 use App\Repository\AbonnementRepository;
@@ -17,6 +19,7 @@ use App\Repository\ResetPasswordTokenRepository;
 use App\Repository\SurccursaleRepository;
 use App\Repository\TypeUserRepository;
 use App\Repository\UserRepository;
+use App\Service\AddCategorie;
 use App\Service\ResetPasswordService;
 use App\Service\SendMailService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -67,6 +70,73 @@ class ApiUserController extends ApiInterface
         // On envoie la réponse
         return $response;
     }
+    #[Route('/actif/entreprise', methods: ['GET'])]
+    /**
+     * Retourne la liste des users actifs d'une entreprise.
+     * 
+     */
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the rewards of an user',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: User::class, groups: ['full']))
+        )
+    )]
+    #[OA\Tag(name: 'user')]
+    // #[Security(name: 'Bearer')]
+    public function indexEntrepriseActive(UserRepository $userRepository): Response
+    {
+        try {
+
+            $users = $userRepository->findBy(['entreprise' => $this->getUser()->getEntreprise(), 'isActive' => true], ['id' => 'ASC']);
+
+            $context = [AbstractNormalizer::GROUPS => 'group1'];
+            $json = $this->serializer->serialize($users, 'json', $context);
+
+            return new JsonResponse(['code' => 200, 'data' => json_decode($json)]);
+        } catch (\Exception $exception) {
+            $this->setMessage("");
+            $response = $this->response('[]');
+        }
+
+        // On envoie la réponse
+        return $response;
+    }
+
+    #[Route('/entreprise', methods: ['GET'])]
+    /**
+     * Retourne la liste des users d'une entreprise.
+     * 
+     */
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the rewards of an user',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: User::class, groups: ['full']))
+        )
+    )]
+    #[OA\Tag(name: 'user')]
+    // #[Security(name: 'Bearer')]
+    public function indexEntreprise(UserRepository $userRepository): Response
+    {
+        try {
+
+            $users = $userRepository->findBy(['entreprise' => $this->getUser()->getEntreprise()], ['id' => 'ASC']);
+
+            $context = [AbstractNormalizer::GROUPS => 'group1'];
+            $json = $this->serializer->serialize($users, 'json', $context);
+
+            return new JsonResponse(['code' => 200, 'data' => json_decode($json)]);
+        } catch (\Exception $exception) {
+            $this->setMessage("");
+            $response = $this->response('[]');
+        }
+
+        // On envoie la réponse
+        return $response;
+    }
 
 
     #[Route('/create',  methods: ['POST'])]
@@ -98,7 +168,7 @@ class ApiUserController extends ApiInterface
     )]
     #[OA\Tag(name: 'user')]
     #[Security(name: 'Bearer')]
-    public function create(Request $request, AbonnementRepository $abonnementRepository, ModuleAbonnementRepository $moduleAbonnementRepository, TypeUserRepository $typeUserRepository, UserRepository $userRepository, EntrepriseRepository $entrepriseRepository, SendMailService $sendMailService): Response
+    public function create(Request $request, AddCategorie $addCategorie, SurccursaleRepository $surccursaleRepository, AbonnementRepository $abonnementRepository, ModuleAbonnementRepository $moduleAbonnementRepository, TypeUserRepository $typeUserRepository, UserRepository $userRepository, EntrepriseRepository $entrepriseRepository, SendMailService $sendMailService): Response
     {
 
         try {
@@ -126,8 +196,19 @@ class ApiUserController extends ApiInterface
 
 
             /*   $entreprise->addUser($user); */
+            $nombreSms = 0;
+            $nombreUser = 0;
+            $Nombresuccursale = 0;
 
-            $module = $moduleAbonnementRepository->findOneBy(['code' => 'FREE']);
+
+            $module = new ModuleAbonnement() ;//$moduleAbonnementRepository->findOneBy(['code' => 'FREE']);
+
+            foreach($module->getLigneModules() as  $ligneModule){
+                $nombreSms = $ligneModule->getLibelle() == "SMS" ? $ligneModule->getQuantite() : 0;
+                $nombreUser = $ligneModule->getLibelle() == "USER" ? $ligneModule->getQuantite() : 0;
+                $Nombresuccursale = $ligneModule->getLibelle() == "SUCCURSALE" ? $ligneModule->getQuantite() : 0;
+                /* $Nombresuccursale = $ligneModule->getNombreSuccursale(); */
+            }
 
             $abonnement = new Abonnement();
             $abonnement->setEntreprise($entreprise);
@@ -157,6 +238,12 @@ class ApiUserController extends ApiInterface
                 $userRepository->add($user, true);
                 $abonnementRepository->add($abonnement, true);
                 // $entrepriseRepository->add($entreprise, true);
+                $addCategorie->setParametreForEntreprise($user);
+                $addCategorie->setting($entreprise,[
+                    'succursale' => $Nombresuccursale,
+                    'user' => $nombreUser,
+                    'sms' => $nombreSms
+                ]);
 
                 $sendMailService->sendNotification([
                     'libelle' => "Bienvenue dans notre application",
@@ -358,7 +445,7 @@ class ApiUserController extends ApiInterface
             $names = 'document_' . '01';
             $filePrefix  = str_slug($names);
             $filePath = $this->getUploadDir(self::UPLOAD_PATH, true);
-          
+
             $uploadedFile = $request->files->get('logo');
 
 
@@ -390,6 +477,4 @@ class ApiUserController extends ApiInterface
         }
         return $response;
     }
-
- 
 }

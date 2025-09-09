@@ -10,54 +10,59 @@ use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: FactureRepository::class)]
 class Facture
-{use TraitEntity;
+{
+    use TraitEntity;
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-     #[Groups(["group1", "group_type"])]
+    #[Groups(["group1", "group_type"])]
 
     private ?int $id = null;
 
     #[ORM\Column]
-     #[Groups(["group1", "group_type"])]
+    #[Groups(["group1", "group_type"])]
     private ?\DateTime $dateRetrait = null;
 
     #[ORM\Column]
-     #[Groups(["group1", "group_type"])]
+    #[Groups(["group1", "group_type"])]
     private ?\DateTime $dateDepot = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-     #[Groups(["group1", "group_type"])]
+    #[Groups(["group1", "group_type"])]
     private ?string $avance = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-     #[Groups(["group1", "group_type"])]
+    #[Groups(["group1", "group_type"])]
     private ?string $MontantTotal = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-     #[Groups(["group1", "group_type"])]
+    #[Groups(["group1", "group_type"])]
     private ?string $remise = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-     #[Groups(["group1", "group_type"])]
+    #[Groups(["group1", "group_type"])]
     private ?string $ResteArgent = null;
 
     #[ORM\ManyToOne(inversedBy: 'factures')]
-     #[Groups(["group1", "group_type"])]
+    #[Groups(["group1", "group_type"])]
     private ?Client $client = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(["group1", "group_type"])]
+    private ?string $signature = null;
 
     /**
      * @var Collection<int, Mesure>
      */
     #[ORM\OneToMany(targetEntity: Mesure::class, mappedBy: 'facture')]
-     #[Groups(["group1", "group_type"])]
+    #[Groups(["group1", "group_type"])]
     private Collection $mesures;
 
     /**
      * @var Collection<int, PaiementFacture>
      */
     #[ORM\OneToMany(targetEntity: PaiementFacture::class, mappedBy: 'facture')]
-     #[Groups(["group1", "group_type"])]
+    #[Groups(["group1", "group_type"])]
     private Collection $paiementFactures;
 
 
@@ -66,7 +71,6 @@ class Facture
     {
         $this->mesures = new ArrayCollection();
         $this->paiementFactures = new ArrayCollection();
-        
     }
 
     public function getId(): ?int
@@ -218,5 +222,15 @@ class Facture
         return $this;
     }
 
-   
+    public function getSignature(): ?string
+    {
+        return $this->signature;
+    }
+
+    public function setSignature(?string $signature): static
+    {
+        $this->signature = $signature;
+
+        return $this;
+    }
 }

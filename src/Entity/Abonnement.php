@@ -27,9 +27,11 @@ class Abonnement
     private ?Entreprise $entreprise = null;
 
     #[ORM\Column]
+     #[Groups(["group1"])]
     private ?\DateTime $dateFin = null;
 
     #[ORM\Column(length: 255)]
+     #[Groups(["group1"])]
     private ?string $type = null;
 
     public function getId(): ?int

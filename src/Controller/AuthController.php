@@ -2,6 +2,9 @@
 
 namespace App\Controller;
 
+use App\Controller\Apis\Config\ApiInterface;
+use App\Entity\Setting;
+use App\Repository\SettingRepository;
 use App\Repository\UserRepository;
 use App\Service\JwtService;
 use App\Service\SubscriptionChecker;
@@ -14,42 +17,37 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use OpenApi\Attributes as OA;
 
 
-class AuthController extends AbstractController
+class AuthController extends ApiInterface
 {
-  
+
 
     #[Route('/api/login', methods: ['POST'])]
-      #[OA\Post(
+    #[OA\Post(
         summary: "Login for a user",
         description: "login for a user",
         requestBody: new OA\RequestBody(
             required: true,
-            content: new OA\JsonContent(
-                properties: [
-
-                    new OA\Property(property: "login", type: "string"),
-                    new OA\Property(property: "password", type: "string"),
-
-                ],
-                type: "object"
-            )
+            content: new OA\JsonContent(properties: [new OA\Property(property: "login", type: "string"), new OA\Property(property: "password", type: "string"),], type: "object")
         ),
-        responses: [
-            new OA\Response(response: 401, description: "Invalid credentials")
-        ]
+        /* responses: [ new OA\Response(response: 401, description: "Invalid credentials") ] */
     )]
     #[OA\Tag(name: 'auth')]
     public function login(
         Request $request,
         JwtService $jwtService,
         UserPasswordHasherInterface $hasher,
-        UserRepository $userRepo,SubscriptionChecker $subscriptionChecker
+        UserRepository $userRepo,
+        SubscriptionChecker $subscriptionChecker,
+        SettingRepository $settingRepository
     ): JsonResponse {
         $data = json_decode($request->getContent(), true);
         $user = $userRepo->findOneBy(['login' => $data['login']]);
 
         if (!$user || !$hasher->isPasswordValid($user, $data['password'])) {
             return $this->json(['error' => 'Invalid credentials'], Response::HTTP_UNAUTHORIZED);
+        }elseif(!$user->isActive()){
+
+              return $this->errorResponse($user,'User is not active');
         }
 
         $token = $jwtService->generateToken([
@@ -58,19 +56,36 @@ class AuthController extends AbstractController
             'roles' => $user->getRoles()
         ]);
 
-         $inactiveSubscriptions = $subscriptionChecker->checkInactiveSubscription($user->getEntreprise());
-        
+        $inactiveSubscriptions = $subscriptionChecker->checkInactiveSubscription($user->getEntreprise());
+         $activeSubscriptions = $subscriptionChecker->getActiveSubscription($user->getEntreprise());
+        /* dd($this->json([$activeSubscriptions])); */
 
-        return $this->json([
+        return $this->responseData([
             'token' => $token,
             'user' => [
                 'id' => $user->getId(),
                 'login' => $user->getLogin(),
                 'roles' => $user->getRoles(),
                 'is_active' => $user->isActive(),
-                'inactiveSubscriptions' => $inactiveSubscriptions
+                'inactiveSubscriptions' => $inactiveSubscriptions,
+                'settings' =>  $settingRepository->findOneBy(['entreprise' => $user->getEntreprise()]),
+                'activeSubscriptions' => $activeSubscriptions
             ],
             'token_expires_in' => $jwtService->getTtl()
-        ]);
+        ], 'group1', ['Content-Type' => 'application/json']);
+
+        /*    return $this->json([
+            'token' => $token,
+            'user' => [
+                'id' => $user->getId(),
+                'login' => $user->getLogin(),
+                'roles' => $user->getRoles(),
+                'is_active' => $user->isActive(),
+                'inactiveSubscriptions' => $inactiveSubscriptions,
+                'settings' =>  $settingRepository->findOneBy(['entreprise' => $user->getEntreprise()])
+                //'activeSubscriptions' => $activeSubscriptions
+            ],
+            'token_expires_in' => $jwtService->getTtl()
+        ]); */
     }
 }

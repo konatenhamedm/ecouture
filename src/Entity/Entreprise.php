@@ -75,6 +75,12 @@ class Entreprise
     #[ORM\OneToMany(targetEntity: Surccursale::class, mappedBy: 'entreprise')]
     private Collection $surccursales;
 
+    /**
+     * @var Collection<int, Setting>
+     */
+    #[ORM\OneToMany(targetEntity: Setting::class, mappedBy: 'entreprise')]
+    private Collection $settings;
+
     public function __construct()
     {
         $this->categorieMesures = new ArrayCollection();
@@ -83,6 +89,7 @@ class Entreprise
         $this->typeMesures = new ArrayCollection();
         $this->users = new ArrayCollection();
         $this->surccursales = new ArrayCollection();
+        $this->settings = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -314,6 +321,36 @@ class Entreprise
             // set the owning side to null (unless already changed)
             if ($surccursale->getEntreprise() === $this) {
                 $surccursale->setEntreprise(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Setting>
+     */
+    public function getSettings(): Collection
+    {
+        return $this->settings;
+    }
+
+    public function addSetting(Setting $setting): static
+    {
+        if (!$this->settings->contains($setting)) {
+            $this->settings->add($setting);
+            $setting->setEntreprise($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSetting(Setting $setting): static
+    {
+        if ($this->settings->removeElement($setting)) {
+            // set the owning side to null (unless already changed)
+            if ($setting->getEntreprise() === $this) {
+                $setting->setEntreprise(null);
             }
         }
 

@@ -109,11 +109,11 @@ class ApiTypeMesureController extends ApiInterface
     )]
     #[OA\Tag(name: 'typeMesure')]
     // #[Security(name: 'Bearer')]
-    public function indexAllCategorieByTypeMessure(TypeMesureRepository $typeMesureRepository,CategorieTypeMesureRepository $categorieMesureRepository,$typeMesure): Response
+    public function indexAllCategorieByTypeMessure(TypeMesureRepository $typeMesureRepository,CategorieTypeMesureRepository $categorieTypeMesureRepository,$typeMesure): Response
     {
         try {
 
-            $categories = $categorieMesureRepository->findBy(
+            $categories = $categorieTypeMesureRepository->findBy(
                 ['typeMesure' => $typeMesure],
                 ['id' => 'ASC']
             );
@@ -172,7 +172,7 @@ class ApiTypeMesureController extends ApiInterface
 
     #[Route('/create',  methods: ['POST'])]
     /**
-     * Permet de créer un(e) typeMesure.
+     * Permet de créer un(e) typeMesure avec ses lignes.
      */
     #[OA\Post(
         summary: "Authentification admin",

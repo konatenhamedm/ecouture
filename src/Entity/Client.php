@@ -40,6 +40,13 @@ class Client
     #[ORM\ManyToOne(inversedBy: 'clients')]
     private ?Surccursale $surccursale = null;
 
+
+
+     #[ORM\ManyToOne(cascade: ["persist"], fetch: "EAGER")]
+    #[ORM\JoinColumn(nullable: true)]
+    #[Groups(["fichier", "group1"])]
+    private ?Fichier $photo = null;
+
     public function __construct()
     {
         $this->factures = new ArrayCollection();
@@ -126,6 +133,18 @@ class Client
     public function setSurccursale(?Surccursale $surccursale): static
     {
         $this->surccursale = $surccursale;
+
+        return $this;
+    }
+
+    public function getPhoto(): ?Fichier
+    {
+        return $this->photo;
+    }
+
+    public function setPhoto(?Fichier $photo): static
+    {
+        $this->photo = $photo;
 
         return $this;
     }

@@ -28,6 +28,10 @@ class LigneModule
     #[ORM\ManyToOne(inversedBy: 'ligneModules')]
     private ?ModuleAbonnement $moduleAbonnement = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+     #[Groups(["group1", "group_type"])]
+    private ?string $quantite = null;
+
 
     public function getId(): ?int
     {
@@ -80,6 +84,18 @@ class LigneModule
     public function setModule(?Module $module): static
     {
         $this->module = $module;
+
+        return $this;
+    }
+
+    public function getQuantite(): ?string
+    {
+        return $this->quantite;
+    }
+
+    public function setQuantite(?string $quantite): static
+    {
+        $this->quantite = $quantite;
 
         return $this;
     }

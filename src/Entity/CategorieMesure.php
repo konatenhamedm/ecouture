@@ -11,6 +11,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Entity(repositoryClass: CategorieMesureRepository::class)]
 class CategorieMesure
 {
+    // longueur, largeur, hauteur
     use TraitEntity;
     #[ORM\Id]
     #[ORM\GeneratedValue]

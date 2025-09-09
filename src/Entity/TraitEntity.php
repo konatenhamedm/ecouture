@@ -27,8 +27,8 @@ trait TraitEntity
     #[ORM\JoinColumn(nullable: true)]
     private ?User $updatedBy = null;
 
-
-    #[ORM\PrePersist]
+/* 
+    #[ORM\PrePersist] */
     public function setCreatedAtValue(): void
     {
         if ($this->createdAt === null) {
@@ -36,7 +36,7 @@ trait TraitEntity
         }
     }
 
-    #[ORM\PreUpdate]
+ /*    #[ORM\PreUpdate] */
     public function setUpdatedAt(): void
     {
         $this->updatedAt = new DateTimeImmutable();

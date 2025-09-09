@@ -140,7 +140,7 @@ class ApiClientController extends ApiInterface
     }
 
 
-    #[Route('/create',  methods: ['POST'])]
+    #[Route('/create', methods: ['POST'])]
     /**
      * Permet de créer un(e) client.
      */
@@ -149,14 +149,18 @@ class ApiClientController extends ApiInterface
         description: "Génère un token JWT pour les administrateurs.",
         requestBody: new OA\RequestBody(
             required: true,
-            content: new OA\JsonContent(
-                properties: [
-                    new OA\Property(property: "nom", type: "string"),
-                    new OA\Property(property: "numero", type: "string"),
-                    new OA\Property(property: "surccursale", type: "string")
+            content: new OA\MediaType(
+                mediaType: "multipart/form-data",
+                schema: new OA\Schema(
+                    type: "object",
+                    properties: [
+                        new OA\Property(property: "nom", type: "string"),
+                        new OA\Property(property: "numero", type: "string"),
+                        new OA\Property(property: "surccursale", type: "string"),
+                        new OA\Property(property: "photo", type: "string", format: "binary"),
+                    ],
 
-                ],
-                type: "object"
+                )
             )
         ),
         responses: [
@@ -166,12 +170,24 @@ class ApiClientController extends ApiInterface
     #[OA\Tag(name: 'client')]
     public function create(Request $request, ClientRepository $clientRepository): Response
     {
-
+        $names = 'document_' . '01';
+        $filePrefix  = str_slug($names);
+        $filePath = $this->getUploadDir(self::UPLOAD_PATH, true);
         $data = json_decode($request->getContent(), true);
+
+        $uploadedFile = $request->files->get('photo');
+
         $client = new Client();
-        $client->setNom($data['nom']);
-        $client->setNumero($data['numero']);
-        $client->setSurccursale($data['surccursale']);
+        $client->setNom($request->get('nom'));
+        $client->setNumero($request->get('numero'));
+        $client->setSurccursale($request->get('surccursale'));
+
+        if ($uploadedFile) {
+            if ($fichier = $this->utils->sauvegardeFichier($filePath, $filePrefix, $uploadedFile, self::UPLOAD_PATH)) {
+                $client->setPhoto($fichier);
+            }
+        }
+
         $client->setCreatedBy($this->getUser());
         $client->setUpdatedBy($this->getUser());
         $errorResponse = $this->errorResponse($client);
@@ -187,18 +203,22 @@ class ApiClientController extends ApiInterface
 
     #[Route('/update/{id}', methods: ['PUT', 'POST'])]
     #[OA\Post(
-        summary: "Creation de client",
-        description: "Permet de créer un client.",
+        summary: "Authentification admin",
+        description: "Génère un token JWT pour les administrateurs.",
         requestBody: new OA\RequestBody(
             required: true,
-            content: new OA\JsonContent(
-                properties: [
-                    new OA\Property(property: "nom", type: "string"),
-                    new OA\Property(property: "numero", type: "string"),
-                    new OA\Property(property: "surccursale", type: "string")
+            content: new OA\MediaType(
+                mediaType: "multipart/form-data",
+                schema: new OA\Schema(
+                    type: "object",
+                    properties: [
+                        new OA\Property(property: "nom", type: "string"),
+                        new OA\Property(property: "numero", type: "string"),
+                        new OA\Property(property: "surccursale", type: "string"),
+                        new OA\Property(property: "photo", type: "string", format: "binary"),
+                    ],
 
-                ],
-                type: "object"
+                )
             )
         ),
         responses: [
@@ -210,11 +230,21 @@ class ApiClientController extends ApiInterface
     {
         try {
             $data = json_decode($request->getContent());
+            $names = 'document_' . '01';
+            $filePrefix  = str_slug($names);
+            $filePath = $this->getUploadDir(self::UPLOAD_PATH, true);
             if ($client != null) {
 
-                $client->setNom($data->nom);
-                $client->setNumero($data->numero);
-                $client->setSurccursale($data->surccursale);
+                $client->setNom($request->get('nom'));
+                $client->setNumero($request->get('numero'));
+                $client->setSurccursale($request->get('surccursale'));
+                $uploadedFile = $request->files->get('photo');
+
+                if ($uploadedFile) {
+                    if ($fichier = $this->utils->sauvegardeFichier($filePath, $filePrefix, $uploadedFile, self::UPLOAD_PATH)) {
+                        $client->setPhoto($fichier);
+                    }
+                }
                 $client->setUpdatedBy($this->getUser());
                 $client->setUpdatedAt(new \DateTime());
                 $errorResponse = $this->errorResponse($client);

@@ -69,6 +69,8 @@ class Mesure
     #[ORM\ManyToOne(inversedBy: 'mesures')]
     private ?TypeMesure $typeMesure = null;
 
+
+
     public function __construct()
     {
         $this->ligneMesures = new ArrayCollection();
@@ -205,4 +207,6 @@ class Mesure
 
         return $this;
     }
+
+
 }

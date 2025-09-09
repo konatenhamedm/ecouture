@@ -203,7 +203,7 @@ class ApiPaiementController extends ApiInterface
 
     #[Route('/abonnement/{id}',  methods: ['POST'])]
     /**
-     * Permet de créer un(e) paiement.
+     * Permet de crtéer un(e) abonnement.
      */
     #[OA\Post(
         summary: "Authentification admin",

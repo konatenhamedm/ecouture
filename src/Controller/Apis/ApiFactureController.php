@@ -161,6 +161,7 @@ class ApiFactureController extends ApiInterface
                         new OA\Property(property: "montantTotal", type: "number", format: "float", description: "Montant total de la facture"),
                         new OA\Property(property: "resteArgent", type: "number", format: "float", description: "Reste à payer"),
                         new OA\Property(property: "dateRetrait", type: "string", format: "date-time", description: "Date de retrait prévue"),
+                        new OA\Property(property: "signature", type: "string", description: "Signature du client"),
                         new OA\Property(
                             property: "mesures",
                             type: "array",
@@ -220,6 +221,7 @@ class ApiFactureController extends ApiInterface
 
         $facture->setDateDepot(new \DateTime());
         $facture->setAvance($request->get('avance'));
+        $facture->setSignature($request->get('signature'));
         $facture->setRemise($request->get('remise'));
         $facture->setMontantTotal($request->get('montantTotal'));
         $facture->setResteArgent($request->get('resteArgent'));
