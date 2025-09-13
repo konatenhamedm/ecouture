@@ -3,6 +3,8 @@
 /.env.local
 /.env.local.php
 /.env.*.local
+/.env
+/.htaccess
 /config/secrets/prod/prod.decrypt.private.php
 /public/bundles/
 /var/
@@ -17,5 +19,6 @@
 ###> symfony/asset-mapper ###
 /public/assets/
 /public/uploads/
+/public/.htaccess
 /assets/vendor/
 ###< symfony/asset-mapper ###
