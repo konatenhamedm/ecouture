@@ -1,7 +1,7 @@
 nelmio_api_doc:
   documentation:
     servers:
-      - url: http://127.0.0.1:80001
+      - url: http://back.ateliya.com/
     info:
       title: Documentation API Application 
       description: APIs pour toute la gestion du projet
