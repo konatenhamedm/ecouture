@@ -15,7 +15,23 @@ class TypeUserRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, TypeUser::class);
     }
+    public function add(TypeUser $entity, bool $flush = false): void
+    {   
+        $this->getEntityManager()->persist($entity);
 
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    public function remove(TypeUser $entity, bool $flush = false): void
+    {
+        $this->getEntityManager()->remove($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
     //    /**
     //     * @return TypeUser[] Returns an array of TypeUser objects
     //     */

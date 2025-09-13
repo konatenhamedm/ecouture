@@ -53,13 +53,17 @@ class ModuleAbonnement
 
     #[ORM\Column(length: 255)]
      #[Groups(["group1", "group_type"])]
-    private ?string $code = null;
-
-    /**
-     * @var Collection<int, PaiementAbonnement>
+     private ?string $code = null;
+     
+     /**
+      * @var Collection<int, PaiementAbonnement>
      */
     #[ORM\OneToMany(targetEntity: PaiementAbonnement::class, mappedBy: 'moduleAbonnement')]
     private Collection $paiementAbonnements;
+    
+    #[ORM\Column(nullable: true, unique: true)]
+    #[Groups(["group1", "group_type"])]
+    private ?int $numero = null;
 
     public function __construct()
     {
@@ -220,6 +224,18 @@ class ModuleAbonnement
                 $paiementAbonnement->setModuleAbonnement(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getNumero(): ?int
+    {
+        return $this->numero;
+    }
+
+    public function setNumero(?int $numero): static
+    {
+        $this->numero = $numero;
 
         return $this;
     }

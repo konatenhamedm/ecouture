@@ -5,16 +5,24 @@ namespace  App\Controller\Apis;
 use App\Controller\Apis\Config\ApiInterface;
 use App\DTO\PaiementFactureDTO;
 use App\Entity\Abonnement;
+use App\Entity\CaisseSuccursale;
 use App\Entity\Facture;
+use App\Entity\Modele;
 use App\Entity\ModuleAbonnement;
+use App\Entity\Paiement;
 use App\Entity\PaiementAbonnement;
+use App\Entity\PaiementBoutique;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Entity\PaiementFacture;
 use App\Repository\AbonnementRepository;
+use App\Repository\BoutiqueRepository;
+use App\Repository\CaisseBoutiqueRepository;
+use App\Repository\CaisseSuccursaleRepository;
 use App\Repository\FactureRepository;
 use App\Repository\PaiementFactureRepository;
 use App\Repository\TypeUserRepository;
 use App\Repository\UserRepository;
+use App\Service\PaiementService;
 use App\Service\Utils;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -77,7 +85,9 @@ class ApiPaiementController extends ApiInterface
     // #[Security(name: 'Bearer')]
     public function indexAll(PaiementFactureRepository $paiementRepository, TypeUserRepository $typeUserRepository): Response
     {
-         $inactiveSubscriptions = $this->subscriptionChecker->checkInactiveSubscription($this->getUser()->getEntreprise());
+        if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
+            return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
+        }
 
         try {
             if ($this->getUser()->getType() == $typeUserRepository->findOneBy(['code' => 'ADM'])) {
@@ -130,6 +140,10 @@ class ApiPaiementController extends ApiInterface
     //#[Security(name: 'Bearer')]
     public function getOne(?PaiementFacture $paiement)
     {
+        if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
+            return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
+        }
+
         try {
             if ($paiement) {
                 $response =  $this->responseData($paiement, 'group1', ['Content-Type' => 'application/json']);
@@ -161,6 +175,7 @@ class ApiPaiementController extends ApiInterface
                 properties: [
                     new OA\Property(property: "montant", type: "string"),
                     new OA\Property(property: "factureId", type: "string"),
+                    new OA\Property(property: "succursaleId", type: "string"),
 
                 ],
                 type: "object"
@@ -171,19 +186,27 @@ class ApiPaiementController extends ApiInterface
         ]
     )]
     #[OA\Tag(name: 'paiement')]
-    public function create(Request $request, Utils $utils, Facture $facture, FactureRepository $factureRepository, PaiementFactureRepository $paiementRepository): Response
+    public function create(Request $request, Utils $utils, CaisseSuccursaleRepository $caisseSuccursaleRepository, Facture $facture, FactureRepository $factureRepository, PaiementFactureRepository $paiementRepository): Response
     {
 
-        $inactiveSubscriptions = $this->subscriptionChecker->checkInactiveSubscription($this->getUser()->getEntreprise());
+        if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
+            return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
+        }
         $data = json_decode($request->getContent(), true);
         $paiement = new PaiementFacture();
         $paiement->setMontant($data['montant']);
         $paiement->setFacture($facture);
+        $paiement->setType(Paiement::TYPE["paiementFacture"]);
         $paiement->setReference($utils->generateReference('PMT'));
         $paiement->setCreatedBy($this->getUser());
         $paiement->setUpdatedBy($this->getUser());
 
         $facture->setResteArgent((int)$facture->getResteArgent() - (int)$data['montant']);
+
+        $caisse = $data['succursaleId'] != null ? $caisseSuccursaleRepository->findOneBy(['surccursale' => $data['succursaleId']]) : $caisseSuccursaleRepository->findOneBy(['surccursale' => $this->getUser()->getSurccursale()]);
+
+        $caisse->setMontant((int)$caisse->getMontant() + (int)$data['montant']);
+        $caisse->setType('caisse_succursale');
 
 
         $errorResponse = $this->errorResponse($paiement);
@@ -193,17 +216,18 @@ class ApiPaiementController extends ApiInterface
 
             $paiementRepository->add($paiement, true);
             $factureRepository->add($facture, true);
+            $caisseSuccursaleRepository->add($caisse, true);
         }
 
         return  $this->responseDataWith_([
-                'data' => $facture,
-                'inactiveSubscriptions' => $inactiveSubscriptions
-            ], 'group1', ['Content-Type' => 'application/json']);;
+            'data' => $facture,
+            'inactiveSubscriptions' => $inactiveSubscriptions
+        ], 'group1', ['Content-Type' => 'application/json']);;
     }
 
-    #[Route('/abonnement/{id}',  methods: ['POST'])]
+    #[Route('/boutique/{id}',  methods: ['POST'])]
     /**
-     * Permet de crtéer un(e) abonnement.
+     * Permet de créer un(e) paiement simple dun modele.
      */
     #[OA\Post(
         summary: "Authentification admin",
@@ -213,7 +237,9 @@ class ApiPaiementController extends ApiInterface
             content: new OA\JsonContent(
                 properties: [
                     new OA\Property(property: "montant", type: "string"),
-                    new OA\Property(property: "factureId", type: "string"),
+                    new OA\Property(property: "boutiqueId", type: "string"),
+                    new OA\Property(property: "modeleId", type: "string"),
+                    new OA\Property(property: "quantite", type: "string"),
 
                 ],
                 type: "object"
@@ -224,44 +250,53 @@ class ApiPaiementController extends ApiInterface
         ]
     )]
     #[OA\Tag(name: 'paiement')]
-    public function createAbonnement(Request $request, AbonnementRepository $abonnementRepository, Utils $utils, ModuleAbonnement $moduleAbonnement, FactureRepository $factureRepository, PaiementFactureRepository $paiementRepository): Response
+    public function paiementBoutiqueModele(Request $request, Utils $utils, CaisseBoutiqueRepository $caisseBoutiqueRepository, BoutiqueRepository $boutiqueRepository,  FactureRepository $factureRepository, PaiementFactureRepository $paiementRepository): Response
     {
-        $inactiveSubscriptions = $this->subscriptionChecker->checkInactiveSubscription($this->getUser()->getEntreprise());
+
+        if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
+            return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
+        }
         $data = json_decode($request->getContent(), true);
-        $paiement = new PaiementAbonnement();
+        $paiement = new PaiementBoutique();
         $paiement->setMontant($data['montant']);
-        $paiement->setModuleAbonnement($moduleAbonnement);
-        $paiement->setCreatedAtValue(new \DateTime());
+        $paiement->setType(Paiement::TYPE["paiementBoutique"]);
+        $paiement->setBoutique($boutiqueRepository->findOneBy(['id' => $data['boutiqueId']]));
         $paiement->setReference($utils->generateReference('PMT'));
+        $paiement->setQuantite($data['quantite']);
         $paiement->setCreatedBy($this->getUser());
         $paiement->setUpdatedBy($this->getUser());
 
-        $abonnement = $$abonnementRepository->findOneBy(['moduleAbonnement' => $moduleAbonnement, 'entreprise' => $this->getUser()->getEntreprise()]);
+        $caisse =  $caisseBoutiqueRepository->findOneBy(['boutique' => $data['boutiqueId']]);
 
-        if ($abonnement == null) {
-            $abonnement = new Abonnement();
-            $abonnement->setModuleAbonnement($moduleAbonnement);
-            $abonnement->setEntreprise($this->getUser()->getEntreprise());
-            $abonnement->setDateFin((new \DateTime())->modify('+' . $moduleAbonnement->getDuree() . ' month'));
-            $abonnement->setType('payant');
-            $abonnement->setEtat('actif');
-        } else {
-            $abonnement->getEtat() != "actif" ? $abonnement->setDateFin((new \DateTime())->modify('+' . $moduleAbonnement->getDuree() . ' month')) : $abonnement->setDateFin($abonnement->getDateFin()->modify('+' . $moduleAbonnement->getDuree() . ' month'));
-            $abonnement->setType('payant');
-        }
+        $caisse->setMontant((int)$caisse->getMontant() + (int)$data['montant']);
+        $caisse->setType('caisse_boutique');
+
 
         $errorResponse = $this->errorResponse($paiement);
         if ($errorResponse !== null) {
             return $errorResponse; // Retourne la réponse d'erreur si des erreurs sont présentes
         } else {
+
             $paiementRepository->add($paiement, true);
+
+            $caisseBoutiqueRepository->add($caisse, true);
         }
 
-        return    $this->responseDataWith_([
-                'data' => $abonnement,
-                'inactiveSubscriptions' => $inactiveSubscriptions
-            ], 'group1', ['Content-Type' => 'application/json']);
+        return  $this->responseDataWith_([
+            'data' => $paiement,
+            'inactiveSubscriptions' => $inactiveSubscriptions
+        ], 'group1', ['Content-Type' => 'application/json']);;
     }
+
+    #[Route('/webhook', name: 'webhook_paiement', methods: ['POST'])]
+    public function webHook(Request $request,  PaiementService $paiementService): Response
+    {
+        $response = $paiementService->methodeWebHook($request);
+
+
+        return  $this->responseData($response, 'group1', ['Content-Type' => 'application/json']);
+    }
+
 
 
     #[Route('/delete/{id}',  methods: ['DELETE'])]
@@ -280,6 +315,10 @@ class ApiPaiementController extends ApiInterface
     //#[Security(name: 'Bearer')]
     public function delete(Request $request, PaiementFacture $paiement, PaiementFactureRepository $villeRepository): Response
     {
+        if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
+            return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
+        }
+
         try {
 
             if ($paiement != null) {
@@ -316,6 +355,10 @@ class ApiPaiementController extends ApiInterface
     #[OA\Tag(name: 'paiement')]
     public function deleteAll(Request $request, PaiementFactureRepository $villeRepository): Response
     {
+        if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
+            return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
+        }
+
         try {
             $data = json_decode($request->getContent());
 

@@ -7,14 +7,40 @@ use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 class SendMailService
 {
     private $mailer;
+    private $tokenStorage;
 
-    public function __construct(MailerInterface $mailer, private EntityManagerInterface $em)
-    {
+    public function __construct(
+        MailerInterface $mailer,
+        private EntityManagerInterface $em,
+        TokenStorageInterface $tokenStorage
+    ) {
         $this->mailer = $mailer;
+        $this->tokenStorage = $tokenStorage;
+    }
+
+    /**
+     * Récupère l'utilisateur connecté
+     */
+    public function getCurrentUser(): ?UserInterface
+    {
+        $token = $this->tokenStorage->getToken();
+
+        if (null === $token) {
+            return null;
+        }
+
+        $user = $token->getUser();
+        if ($user instanceof User) {
+            return $user;
+        }
+
+        return null;
     }
 
     public function send(
@@ -36,23 +62,24 @@ class SendMailService
         $this->mailer->send($email);
     }
 
-    public function  sendNotification($data = [])
+    public function sendNotification($data = [])
     {
 
-     
+        $currentUser = $this->getCurrentUser();
+
         $notification = new Notification();
         $notification->setLibelle($data['libelle']);
         $notification->setTitre($data['titre']);
         $notification->setEntreprise($data['entreprise']);
         $notification->setUser($data['user']);
-        $notification->setUpdatedBy($data['userUpdate']);
-        $notification->setCreatedBy($data['userUpdate']);
+
+        $notification->setUpdatedBy($currentUser);
+        $notification->setCreatedBy($currentUser);
+
         $notification->setUpdatedAt(new \DateTime());
         $notification->setCreatedAtValue(new \DateTime());
-         
+
         $this->em->persist($notification);
         $this->em->flush();
-
-        
     }
 }

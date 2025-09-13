@@ -13,9 +13,9 @@ class SubscriptionChecker
         private AbonnementRepository $abonnementRepository
     ) {}
 
-    public function getInactiveSubscriptions(Entreprise $entreprise): array
+    public function getInactiveSubscriptions(Entreprise $entreprise)
     {
-        return $this->abonnementRepository->findBy([
+        return $this->abonnementRepository->findOneBy([
             'entreprise' => $entreprise,
             'etat' => 'inactif'
         ], ['dateFin' => 'DESC']);
@@ -26,43 +26,45 @@ class SubscriptionChecker
         $inactiveSubscriptions = $this->getInactiveSubscriptions($entreprise);
 
         if (empty($inactiveSubscriptions)) {
-            return [];
+            return [",dnlkd,nd"];
         }
 
         // Formater les données pour la réponse
-        $formattedSubscriptions = array_map(function (Abonnement $abonnement) {
-            return [
-                'id' => $abonnement->getId(),
-                'type' => $abonnement->getType(),
-                'dateFin' => $abonnement->getDateFin()->format('Y-m-d H:i:s'),
-                'code' => $abonnement->getModuleAbonnement()?->getCode(),
-                'daysSinceExpiration' => (new \DateTime())->diff($abonnement->getDateFin())->days
-            ];
-        }, $inactiveSubscriptions);
+        /*  $formattedSubscriptions = array_map(function (Abonnement $abonnement) { */
+        return [
+            'id' => $inactiveSubscriptions->getId(),
+            'type' => $inactiveSubscriptions->getType(),
+            'dateFin' => $inactiveSubscriptions->getDateFin()->format('Y-m-d H:i:s'),
+            'code' => $inactiveSubscriptions->getModuleAbonnement()?->getCode(),
+            'daysSinceExpiration' => (new \DateTime())->diff($inactiveSubscriptions->getDateFin())->days
+        ];
+        /*  }, $inactiveSubscriptions); */
 
         return $formattedSubscriptions;
     }
 
     public function getActiveSubscription(Entreprise $entreprise): ?Abonnement
     {
-        return $this->abonnementRepository->findActiveForEntreprise($entreprise);
+        //dd("entreprise", $entreprise);
+        $activeSubscriptions = $this->abonnementRepository->findActiveForEntreprise($entreprise);
+        return $activeSubscriptions;
     }
 
-    public function checkFeatureAccess(Entreprise $entreprise, string $feature): void
+    public function checkFeatureAccess(Entreprise $entreprise): void
     {
         $abonnement = $this->getActiveSubscription($entreprise);
 
-        if (!$abonnement || !$abonnement->getEtat()) {
+        if (!$abonnement) {
             throw new HttpException(403, 'Abonnement requis pour cette fonctionnalité');
         }
 
         // Vérification des modules/fonctionnalités spécifiques
-        $module = $abonnement->getModuleAbonnement();
+        /*  $module = $abonnement->getModuleAbonnement();
         if (!$module || !$module->hasFeature($feature)) {
             throw new HttpException(403, sprintf(
                 'Votre abonnement "%s" ne donne pas accès à cette fonctionnalité',
                 $abonnement->getType()
             ));
-        }
+        } */
     }
 }

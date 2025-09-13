@@ -81,6 +81,39 @@ class Entreprise
     #[ORM\OneToMany(targetEntity: Setting::class, mappedBy: 'entreprise')]
     private Collection $settings;
 
+    /**
+     * @var Collection<int, Boutique>
+     */
+    #[ORM\OneToMany(targetEntity: Boutique::class, mappedBy: 'entreprise')]
+    private Collection $boutiques;
+
+    #[ORM\ManyToOne(inversedBy: 'entreprises')]
+    private ?Pays $pays = null;
+
+    /**
+     * @var Collection<int, PaiementAbonnement>
+     */
+    #[ORM\OneToMany(targetEntity: PaiementAbonnement::class, mappedBy: 'entreprise')]
+    private Collection $paiementAbonnements;
+
+    /**
+     * @var Collection<int, Modele>
+     */
+    #[ORM\OneToMany(targetEntity: Modele::class, mappedBy: 'entreprise')]
+    private Collection $modeles;
+
+    /**
+     * @var Collection<int, Caisse>
+     */
+    #[ORM\OneToMany(targetEntity: Caisse::class, mappedBy: 'entreprise')]
+    private Collection $caisses;
+
+    /**
+     * @var Collection<int, Reservation>
+     */
+    #[ORM\OneToMany(targetEntity: Reservation::class, mappedBy: 'entreprise')]
+    private Collection $reservations;
+
     public function __construct()
     {
         $this->categorieMesures = new ArrayCollection();
@@ -90,6 +123,11 @@ class Entreprise
         $this->users = new ArrayCollection();
         $this->surccursales = new ArrayCollection();
         $this->settings = new ArrayCollection();
+        $this->boutiques = new ArrayCollection();
+        $this->paiementAbonnements = new ArrayCollection();
+        $this->modeles = new ArrayCollection();
+        $this->caisses = new ArrayCollection();
+        $this->reservations = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -351,6 +389,168 @@ class Entreprise
             // set the owning side to null (unless already changed)
             if ($setting->getEntreprise() === $this) {
                 $setting->setEntreprise(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Boutique>
+     */
+    public function getBoutiques(): Collection
+    {
+        return $this->boutiques;
+    }
+
+    public function addBoutique(Boutique $boutique): static
+    {
+        if (!$this->boutiques->contains($boutique)) {
+            $this->boutiques->add($boutique);
+            $boutique->setEntreprise($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBoutique(Boutique $boutique): static
+    {
+        if ($this->boutiques->removeElement($boutique)) {
+            // set the owning side to null (unless already changed)
+            if ($boutique->getEntreprise() === $this) {
+                $boutique->setEntreprise(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getPays(): ?Pays
+    {
+        return $this->pays;
+    }
+
+    public function setPays(?Pays $pays): static
+    {
+        $this->pays = $pays;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, PaiementAbonnement>
+     */
+    public function getPaiementAbonnements(): Collection
+    {
+        return $this->paiementAbonnements;
+    }
+
+    public function addPaiementAbonnement(PaiementAbonnement $paiementAbonnement): static
+    {
+        if (!$this->paiementAbonnements->contains($paiementAbonnement)) {
+            $this->paiementAbonnements->add($paiementAbonnement);
+            $paiementAbonnement->setEntreprise($this);
+        }
+
+        return $this;
+    }
+
+    public function removePaiementAbonnement(PaiementAbonnement $paiementAbonnement): static
+    {
+        if ($this->paiementAbonnements->removeElement($paiementAbonnement)) {
+            // set the owning side to null (unless already changed)
+            if ($paiementAbonnement->getEntreprise() === $this) {
+                $paiementAbonnement->setEntreprise(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Modele>
+     */
+    public function getModeles(): Collection
+    {
+        return $this->modeles;
+    }
+
+    public function addModele(Modele $modele): static
+    {
+        if (!$this->modeles->contains($modele)) {
+            $this->modeles->add($modele);
+            $modele->setEntreprise($this);
+        }
+
+        return $this;
+    }
+
+    public function removeModele(Modele $modele): static
+    {
+        if ($this->modeles->removeElement($modele)) {
+            // set the owning side to null (unless already changed)
+            if ($modele->getEntreprise() === $this) {
+                $modele->setEntreprise(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Caisse>
+     */
+    public function getCaisses(): Collection
+    {
+        return $this->caisses;
+    }
+
+    public function addCaiss(Caisse $caiss): static
+    {
+        if (!$this->caisses->contains($caiss)) {
+            $this->caisses->add($caiss);
+            $caiss->setEntreprise($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCaiss(Caisse $caiss): static
+    {
+        if ($this->caisses->removeElement($caiss)) {
+            // set the owning side to null (unless already changed)
+            if ($caiss->getEntreprise() === $this) {
+                $caiss->setEntreprise(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Reservation>
+     */
+    public function getReservations(): Collection
+    {
+        return $this->reservations;
+    }
+
+    public function addReservation(Reservation $reservation): static
+    {
+        if (!$this->reservations->contains($reservation)) {
+            $this->reservations->add($reservation);
+            $reservation->setEntreprise($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReservation(Reservation $reservation): static
+    {
+        if ($this->reservations->removeElement($reservation)) {
+            // set the owning side to null (unless already changed)
+            if ($reservation->getEntreprise() === $this) {
+                $reservation->setEntreprise(null);
             }
         }
 

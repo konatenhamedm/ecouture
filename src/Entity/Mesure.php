@@ -12,7 +12,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Entity(repositoryClass: MesureRepository::class)]
 class Mesure
 {
-
+    use TraitEntity;
     const ETAT = [
         'EN_COURS' => 'En cours',
         'TERMINEE' => 'Terminée',

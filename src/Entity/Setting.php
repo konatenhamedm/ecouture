@@ -10,6 +10,8 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Entity(repositoryClass: SettingRepository::class)]
 class Setting
 {
+    use TraitEntity;
+   
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -41,6 +43,13 @@ class Setting
     #[ORM\Column(type: Types::TEXT, nullable: true)]
      #[Groups(["group1", "group_type"])]
     private ?string $modeleMessageEnvoyerPourRendezVousProche = null;
+
+    #[ORM\Column]
+    private ?int $nombreBoutique = null;
+
+    #[ORM\Column(nullable: true)]
+     #[Groups(["group1", "group_type"])]
+    private ?int $numeroAbonnement = null;
 
     public function getId(): ?int
     {
@@ -127,6 +136,30 @@ class Setting
     public function setModeleMessageEnvoyerPourRendezVousProche(?string $modeleMessageEnvoyerPourRendezVousProche): static
     {
         $this->modeleMessageEnvoyerPourRendezVousProche = $modeleMessageEnvoyerPourRendezVousProche;
+
+        return $this;
+    }
+
+    public function getNombreBoutique(): ?int
+    {
+        return $this->nombreBoutique;
+    }
+
+    public function setNombreBoutique(int $nombreBoutique): static
+    {
+        $this->nombreBoutique = $nombreBoutique;
+
+        return $this;
+    }
+
+    public function getNumeroAbonnement(): ?int
+    {
+        return $this->numeroAbonnement;
+    }
+
+    public function setNumeroAbonnement(?int $numeroAbonnement): static
+    {
+        $this->numeroAbonnement = $numeroAbonnement;
 
         return $this;
     }

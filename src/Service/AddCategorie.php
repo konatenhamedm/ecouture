@@ -70,7 +70,9 @@ class AddCategorie
         $setting->setEntreprise($entreprise);
         $setting->setNombreSms($data['sms']);
         $setting->setNombreSuccursale($data['succursale']);
+        $setting->setNombreBoutique($data['boutique']);
         $setting->setNombreUser($data['user']);
+        $setting->setNumeroAbonnement($data['numero']);
         $setting->setNombreJourRestantPourEnvoyerSms(10);
         $setting->setModeleMessageEnvoyerPourRendezVousProche("Bonjour, ceci est un rappel pour votre rendez-vous prévu prochainement dans 10 jours, merci de vous présenter à l’heure.");
         $setting->isSendMesssageAutomaticIfRendezVousProche(false);

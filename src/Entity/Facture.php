@@ -47,9 +47,11 @@ class Facture
     #[Groups(["group1", "group_type"])]
     private ?Client $client = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(["group1", "group_type"])]
-    private ?string $signature = null;
+
+    #[ORM\ManyToOne(cascade: ["persist"], fetch: "EAGER")]
+    #[ORM\JoinColumn(nullable: true)]
+    #[Groups(["fichier", "group1"])]
+    private ?Fichier $signature = null;
 
     /**
      * @var Collection<int, Mesure>
@@ -222,12 +224,12 @@ class Facture
         return $this;
     }
 
-    public function getSignature(): ?string
+    public function getSignature(): ?Fichier
     {
         return $this->signature;
     }
 
-    public function setSignature(?string $signature): static
+    public function setSignature(?Fichier $signature): static
     {
         $this->signature = $signature;
 

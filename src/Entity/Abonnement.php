@@ -16,6 +16,7 @@ class Abonnement
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'abonnements')]
+  /*    #[Groups(["group1"])] */
     private ?ModuleAbonnement $moduleAbonnement = null;
 
     #[ORM\Column(length: 255)]

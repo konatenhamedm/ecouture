@@ -5,8 +5,13 @@ namespace  App\Controller\Apis;
 use App\Controller\Apis\Config\ApiInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Entity\Abonnement;
+use App\Entity\ModuleAbonnement;
 use App\Repository\AbonnementRepository;
+use App\Repository\FactureRepository;
+use App\Repository\PaiementFactureRepository;
 use App\Repository\UserRepository;
+use App\Service\PaiementService;
+use App\Service\Utils;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use OpenApi\Attributes as OA;
@@ -22,7 +27,7 @@ class ApiAbonnementController extends ApiInterface
 
     #[Route('/', methods: ['GET'])]
     /**
-     * Retourne la liste des modules.
+     * Retourne la liste des abonnements.
      * 
      */
     #[OA\Response(
@@ -41,8 +46,6 @@ class ApiAbonnementController extends ApiInterface
 
             $categories = $moduleRepository->findAll();
 
-          
-
             $response =  $this->responseData($categories, 'group1', ['Content-Type' => 'application/json']);
         } catch (\Exception $exception) {
             $this->setMessage("");
@@ -52,11 +55,9 @@ class ApiAbonnementController extends ApiInterface
         // On envoie la réponse
         return $response;
     }
-
-
-     #[Route('/entreprise', methods: ['GET'])]
+    #[Route('/info', methods: ['GET'])]
     /**
-     * Retourne la liste des typeMesures d'une entreprise.
+     * Retourne la liste des abonnements.
      * 
      */
     #[OA\Response(
@@ -69,11 +70,102 @@ class ApiAbonnementController extends ApiInterface
     )]
     #[OA\Tag(name: 'abonnement')]
     // #[Security(name: 'Bearer')]
-    public function indexAll(AbonnementRepository $moduleRepository): Response
+    public function showActiveInfoAbonnement(AbonnementRepository $moduleRepository): Response
     {
         try {
 
-            $typeMesures = $moduleRepository->findBy(
+            $categories = $moduleRepository->findAll();
+
+            $response =  $this->responseData($categories, 'group1', ['Content-Type' => 'application/json']);
+        } catch (\Exception $exception) {
+            $this->setMessage("");
+            $response = $this->response('[]');
+        }
+
+        // On envoie la réponse
+        return $response;
+    }
+
+    #[Route('/abonnement/{id}',  methods: ['POST'])]
+    /**
+     * Permet de crtéer un(e) abonnement.
+     */
+    #[OA\Post(
+        summary: "Authentification admin",
+        description: "Génère un token JWT pour les administrateurs.",
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                properties: [
+                    new OA\Property(
+                        property: "dataUser",
+                        type: "array",
+                        items: new OA\Items(type: "integer") // ou "integer", "object", etc.
+                    ),
+                    new OA\Property(
+                        property: "dataBoutique",
+                        type: "array",
+                        items: new OA\Items(type: "integer") // ou le type approprié
+                    ),
+                    new OA\Property(
+                        property: "dataSuccursale",
+                        type: "array",
+                        items: new OA\Items(type: "integer") // ou le type approprié
+                    ),
+
+                    new OA\Property(property: "email", type: "string"),
+                    new OA\Property(property: "entrepriseDenomination", type: "string"),
+                    new OA\Property(property: "numero", type: "string"),
+                    new OA\Property(property: "operateur", type: "string"),
+                ],
+                type: "object"
+            )
+        ),
+        responses: [
+            new OA\Response(response: 401, description: "Invalid credentials")
+        ]
+    )]
+    #[OA\Tag(name: 'paiement')]
+    public function createAbonnement(Request $request, PaiementService $paiementService, AbonnementRepository $abonnementRepository, Utils $utils, ModuleAbonnement $moduleAbonnement, FactureRepository $factureRepository, PaiementFactureRepository $paiementRepository)
+    {
+        
+        $data = json_decode($request->getContent(), true);
+        /* dd($data); */
+        $createTransactionData = $paiementService->traiterPaiement([
+            'dataUser' => $data['dataUser'],
+            'dataBoutique' => $data['dataBoutique'],
+            'dataSuccursale' => $data['dataSuccursale'],
+            'email' => $data['email'],
+            'entrepriseDenomination' => $data['entrepriseDenomination'],
+            'numero' => $data['numero'],
+            'operateur' => $data['operateur'],
+        ], $this->getUser(), $moduleAbonnement);
+       // dd($createTransactionData);
+        return   $this->response($createTransactionData);
+    }
+
+
+
+     #[Route('/entreprise', methods: ['GET'])]
+    /**
+     * Retourne la liste des abonnements d'une entreprise.
+     * 
+     */
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the rewards of an user',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new AttributeModel(type: Abonnement::class, groups: ['full']))
+        )
+    )]
+    #[OA\Tag(name: 'abonnement')]
+    // #[Security(name: 'Bearer')]
+    public function indexAll(AbonnementRepository $abonnementRepository): Response
+    {
+        try {
+
+            $typeMesures = $abonnementRepository->findBy(
                 ['entreprise' => $this->getUser()->getEntreprise()],
                 ['id' => 'ASC']
             );

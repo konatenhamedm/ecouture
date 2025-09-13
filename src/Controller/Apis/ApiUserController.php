@@ -15,6 +15,7 @@ use App\Repository\AbonnementRepository;
 use App\Repository\AdministrateurRepository;
 use App\Repository\EntrepriseRepository;
 use App\Repository\ModuleAbonnementRepository;
+use App\Repository\PaysRepository;
 use App\Repository\ResetPasswordTokenRepository;
 use App\Repository\SurccursaleRepository;
 use App\Repository\TypeUserRepository;
@@ -157,6 +158,7 @@ class ApiUserController extends ApiInterface
                     new OA\Property(property: "denominationEntreprise", type: "string"),
                     new OA\Property(property: "emailEntreprise", type: "string"),
                     new OA\Property(property: "numeroEntreprise", type: "string"),
+                    new OA\Property(property: "pays", type: "string"),
 
                 ],
                 type: "object"
@@ -168,10 +170,13 @@ class ApiUserController extends ApiInterface
     )]
     #[OA\Tag(name: 'user')]
     #[Security(name: 'Bearer')]
-    public function create(Request $request, AddCategorie $addCategorie, SurccursaleRepository $surccursaleRepository, AbonnementRepository $abonnementRepository, ModuleAbonnementRepository $moduleAbonnementRepository, TypeUserRepository $typeUserRepository, UserRepository $userRepository, EntrepriseRepository $entrepriseRepository, SendMailService $sendMailService): Response
+    public function create(Request $request, AddCategorie $addCategorie,PaysRepository $paysRepository, SurccursaleRepository $surccursaleRepository, AbonnementRepository $abonnementRepository, ModuleAbonnementRepository $moduleAbonnementRepository, TypeUserRepository $typeUserRepository, UserRepository $userRepository, EntrepriseRepository $entrepriseRepository, SendMailService $sendMailService): Response
     {
 
         try {
+
+            /* $this->allParametres('user'); */
+
             $data = json_decode($request->getContent(), true);
 
             if ($userRepository->findOneBy(['login' => $data['numero']])) {
@@ -183,6 +188,7 @@ class ApiUserController extends ApiInterface
             $entreprise->setLibelle($data['denominationEntreprise']);
             $entreprise->setEmail($data['emailEntreprise']);
             $entreprise->setNumero($data['numeroEntreprise']);
+            $entreprise->setPays($paysRepository->find($data['pays']));
             $entreprise->setCreatedAtValue(new \DateTime());
             $entreprise->setUpdatedAt(new \DateTime());
 
@@ -198,15 +204,17 @@ class ApiUserController extends ApiInterface
             /*   $entreprise->addUser($user); */
             $nombreSms = 0;
             $nombreUser = 0;
-            $Nombresuccursale = 0;
+            $nombresuccursale = 0;
+            $nombreBoutique = 0;
 
 
-            $module = new ModuleAbonnement() ;//$moduleAbonnementRepository->findOneBy(['code' => 'FREE']);
+            $module = $moduleAbonnementRepository->findOneBy(['code' => 'FREE']);
 
-            foreach($module->getLigneModules() as  $ligneModule){
+            foreach ($module->getLigneModules() as  $ligneModule) {
                 $nombreSms = $ligneModule->getLibelle() == "SMS" ? $ligneModule->getQuantite() : 0;
                 $nombreUser = $ligneModule->getLibelle() == "USER" ? $ligneModule->getQuantite() : 0;
-                $Nombresuccursale = $ligneModule->getLibelle() == "SUCCURSALE" ? $ligneModule->getQuantite() : 0;
+                $nombresuccursale = $ligneModule->getLibelle() == "SUCCURSALE" ? $ligneModule->getQuantite() : 0;
+                $nombreBoutique = $ligneModule->getLibelle() == "BOUTIQUE" ? $ligneModule->getQuantite() : 0;
                 /* $Nombresuccursale = $ligneModule->getNombreSuccursale(); */
             }
 
@@ -218,16 +226,7 @@ class ApiUserController extends ApiInterface
             $abonnement->setEtat("actif");
             $abonnement->setDateFin((new \DateTime())->modify('+' . $module->getDuree() . ' month'));
             $abonnement->setType('gratuit');
-            //$entreprise->addAbonnement($abonnement);
-
-            /*     dd($abonnement); */
-
-
-            /* 
-            */
-
-
-
+       
             $errorResponse = $data['password'] !== $data['confirmPassword'] ?  $this->errorResponse($user, "Les mots de passe ne sont pas identiques") :  $this->errorResponse($user);
 
             if ($errorResponse !== null) {
@@ -239,10 +238,12 @@ class ApiUserController extends ApiInterface
                 $abonnementRepository->add($abonnement, true);
                 // $entrepriseRepository->add($entreprise, true);
                 $addCategorie->setParametreForEntreprise($user);
-                $addCategorie->setting($entreprise,[
-                    'succursale' => $Nombresuccursale,
+                $addCategorie->setting($entreprise, [
+                    'succursale' => $nombresuccursale,
                     'user' => $nombreUser,
-                    'sms' => $nombreSms
+                    'sms' => $nombreSms,
+                    'boutique' => $nombreBoutique,
+                    'numero'=> $module->getNumero()
                 ]);
 
                 $sendMailService->sendNotification([
@@ -296,6 +297,10 @@ class ApiUserController extends ApiInterface
     #[Security(name: 'Bearer')]
     public function createMembre(Request $request, SurccursaleRepository $surccursaleRepository, TypeUserRepository $typeUserRepository, UserRepository $userRepository, EntrepriseRepository $entrepriseRepository, SendMailService $sendMailService): Response
     {
+        if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
+            return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
+        }
+        $this->allParametres('boutique');
 
         try {
             $data = json_decode($request->getContent(), true);
@@ -371,8 +376,6 @@ class ApiUserController extends ApiInterface
     ): Response {
         try {
             $data = json_decode($request->getContent(), true);
-
-
 
             if (!$user) {
                 return $this->errorResponse(null, "Utilisateur non trouvé", 404);

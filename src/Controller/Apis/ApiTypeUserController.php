@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Entity\TypeUser;
 use App\Repository\TypeUserRepository;
 use App\Repository\UserRepository;
+use DateTime;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use OpenApi\Attributes as OA;
@@ -108,8 +109,7 @@ class ApiTypeUserController extends ApiInterface
                 properties: [
                     new OA\Property(property: "libelle", type: "string"),
                     new OA\Property(property: "code", type: "string"),
-                    new OA\Property(property: "userUpdate", type: "string"),
-
+                   
                 ],
                 type: "object"
             )
@@ -126,8 +126,9 @@ class ApiTypeUserController extends ApiInterface
         $typeUser = new TypeUser();
         $typeUser->setLibelle($data['libelle']);
         $typeUser->setCode($data['code']);
-        $typeUser->setCreatedBy($this->userRepository->find($data['userUpdate']));
-        $typeUser->setUpdatedBy($this->userRepository->find($data['userUpdate']));
+        $typeUser->setCreatedAtValue(new DateTime());
+        $typeUser->setCreatedBy($this->getuser());
+        $typeUser->setUpdatedBy($this->getuser());
         $errorResponse = $this->errorResponse($typeUser);
         if ($errorResponse !== null) {
             return $errorResponse; // Retourne la réponse d'erreur si des erreurs sont présentes
@@ -150,8 +151,7 @@ class ApiTypeUserController extends ApiInterface
                 properties: [
                     new OA\Property(property: "libelle", type: "string"),
                     new OA\Property(property: "code", type: "string"),
-                    new OA\Property(property: "codeGeneration", type: "string"),
-                    new OA\Property(property: "userUpdate", type: "string"),
+                    
 
                 ],
                 type: "object"
@@ -170,7 +170,7 @@ class ApiTypeUserController extends ApiInterface
 
                 $typeUser->setLibelle($data->libelle);
                 $typeUser->setCode($data->code);
-                $typeUser->setUpdatedBy($this->userRepository->find($data->userUpdate));
+                $typeUser->setUpdatedBy($this->getuser());
                 $typeUser->setUpdatedAt(new \DateTime());
                 $errorResponse = $this->errorResponse($typeUser);
 

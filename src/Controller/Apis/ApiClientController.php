@@ -74,9 +74,11 @@ class ApiClientController extends ApiInterface
     // #[Security(name: 'Bearer')]
     public function indexAll(ClientRepository $clientRepository, TypeUserRepository $typeUserRepository): Response
     {
+        if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
+            return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
+        }
         try {
             if ($this->getUser()->getType() == $typeUserRepository->findOneBy(['code' => 'ADM'])) {
-
 
                 $clients = $clientRepository->findBy(
                     ['entreprise' => $this->getUser()->getEntreprise()],
@@ -122,6 +124,9 @@ class ApiClientController extends ApiInterface
     //#[Security(name: 'Bearer')]
     public function getOne(?Client $client)
     {
+        if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
+            return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
+        }
         try {
             if ($client) {
                 $response = $this->response($client);
@@ -170,6 +175,9 @@ class ApiClientController extends ApiInterface
     #[OA\Tag(name: 'client')]
     public function create(Request $request, ClientRepository $clientRepository): Response
     {
+        if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
+            return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
+        }
         $names = 'document_' . '01';
         $filePrefix  = str_slug($names);
         $filePath = $this->getUploadDir(self::UPLOAD_PATH, true);
@@ -178,6 +186,7 @@ class ApiClientController extends ApiInterface
         $uploadedFile = $request->files->get('photo');
 
         $client = new Client();
+        $client->setEntreprise($this->getUser()->getEntreprise());
         $client->setNom($request->get('nom'));
         $client->setNumero($request->get('numero'));
         $client->setSurccursale($request->get('surccursale'));
@@ -228,6 +237,9 @@ class ApiClientController extends ApiInterface
     #[OA\Tag(name: 'client')]
     public function update(Request $request, Client $client, ClientRepository $clientRepository): Response
     {
+       if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
+            return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
+        }
         try {
             $data = json_decode($request->getContent());
             $names = 'document_' . '01';
@@ -289,6 +301,9 @@ class ApiClientController extends ApiInterface
     //#[Security(name: 'Bearer')]
     public function delete(Request $request, Client $client, ClientRepository $villeRepository): Response
     {
+        if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
+            return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
+        }
         try {
 
             if ($client != null) {
@@ -325,6 +340,7 @@ class ApiClientController extends ApiInterface
     #[OA\Tag(name: 'client')]
     public function deleteAll(Request $request, ClientRepository $villeRepository): Response
     {
+
         try {
             $data = json_decode($request->getContent());
 

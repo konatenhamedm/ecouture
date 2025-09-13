@@ -78,4 +78,16 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $user->setPassword($newHashedPassword);
         $this->getEntityManager()->flush();
     }
+
+    public function countActiveByEntreprise($entreprise): int
+    {
+        return $this->createQueryBuilder('u')
+            ->select('COUNT(u.id)')
+            ->where('u.active = :active')
+            ->andWhere('u.entreprise = :entreprise')
+            ->setParameter('active', true)
+            ->setParameter('entreprise', $entreprise)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }

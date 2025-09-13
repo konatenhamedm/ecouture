@@ -4,8 +4,11 @@ namespace App\Service;
 
 use App\Attribute\Source;
 use App\Controller\FileTrait;
+use App\Entity\Caisse;
 use App\Entity\Fichier;
 use App\Entity\Paiement;
+use App\Entity\Reservation;
+use COM;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use ReflectionClass;
@@ -166,6 +169,24 @@ class Utils
         $query = $this->em->createQueryBuilder();
         $query->select("count(a.id)")
             ->from(Paiement::class, 'a');
+
+        $nb = $query->getQuery()->getSingleScalarResult();
+        return ($code . date("y") . date("m") . date("d") . date("H") . date("i") . date("s") . str_pad($nb + 1, 3, '0', STR_PAD_LEFT));
+    }
+    public function generateReferenceCaisse(string $code): string
+    {
+        $query = $this->em->createQueryBuilder();
+        $query->select("count(a.id)")
+            ->from(Caisse::class, 'a');
+
+        $nb = $query->getQuery()->getSingleScalarResult();
+        return ($code . date("y") . date("m") . date("d") . date("H") . date("i") . date("s") . str_pad($nb + 1, 3, '0', STR_PAD_LEFT));
+    }
+    public function generateReferenceReservation(string $code): string
+    {
+        $query = $this->em->createQueryBuilder();
+        $query->select("count(a.id)")
+            ->from(Reservation::class, 'a');
 
         $nb = $query->getQuery()->getSingleScalarResult();
         return ($code . date("y") . date("m") . date("d") . date("H") . date("i") . date("s") . str_pad($nb + 1, 3, '0', STR_PAD_LEFT));

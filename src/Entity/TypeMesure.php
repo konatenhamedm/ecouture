@@ -13,6 +13,8 @@ class TypeMesure
 {use TraitEntity;
 
     //exemple veste , pantalon,boubou
+    use TraitEntity;
+   
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]

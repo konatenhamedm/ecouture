@@ -11,6 +11,7 @@ use App\Entity\Facture;
 use App\Entity\LigneMesure;
 use App\Entity\Mesure;
 use App\Entity\PaiementFacture;
+use App\Repository\CaisseSuccursaleRepository;
 use App\Repository\CategorieMesureRepository;
 use App\Repository\CategorieFactureRepository;
 use App\Repository\ClientRepository;
@@ -82,6 +83,10 @@ class ApiFactureController extends ApiInterface
     // #[Security(name: 'Bearer')]
     public function indexAll(FactureRepository $factureRepository): Response
     {
+        if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
+            return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
+        }
+
         try {
 
             $factures = $factureRepository->findBy(
@@ -122,6 +127,10 @@ class ApiFactureController extends ApiInterface
     //#[Security(name: 'Bearer')]
     public function getOne(?Facture $facture)
     {
+        if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
+            return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
+        }
+
         try {
             if ($facture) {
 
@@ -202,8 +211,12 @@ class ApiFactureController extends ApiInterface
     )]
     #[OA\Tag(name: 'facture')]
     #[Security(name: 'Bearer')]
-    public function create(Request $request, Utils $utils, TypeMesureRepository $typeMesureRepository, ClientRepository $clientRepository, CategorieMesureRepository $categorieMesureRepository, FactureRepository $factureRepository, EntrepriseRepository $entrepriseRepository): Response
+    public function create(Request $request, CaisseSuccursaleRepository $caisseSuccursaleRepository, Utils $utils, TypeMesureRepository $typeMesureRepository, ClientRepository $clientRepository, CategorieMesureRepository $categorieMesureRepository, FactureRepository $factureRepository, EntrepriseRepository $entrepriseRepository): Response
     {
+        if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
+            return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
+        }
+
         $names = 'document_' . '01';
         $filePrefix  = str_slug($names);
         $filePath = $this->getUploadDir(self::UPLOAD_PATH, true);
@@ -213,7 +226,9 @@ class ApiFactureController extends ApiInterface
         if ($request->get('clientId') == null) {
             $client = new Client();
             $client->setNom($data['nom']);
+            $client->setEntreprise($this->getUser()->getEntreprise());
             $client->setNumero($data['numero']);
+            $client->setSurccursale($this->getUser()->getSurccursale());
             $facture->setClient($client);
         } else {
             $facture->setClient($clientRepository->find($request->get('clientId')));
@@ -221,7 +236,15 @@ class ApiFactureController extends ApiInterface
 
         $facture->setDateDepot(new \DateTime());
         $facture->setAvance($request->get('avance'));
-        $facture->setSignature($request->get('signature'));
+        $uploadedFichierSignature = $request->files->get('signature');
+
+        if ($uploadedFichierSignature) {
+           $fichierSignature = $utils->sauvegardeFichier($filePath, $filePrefix, $uploadedFichierSignature, self::UPLOAD_PATH);
+            $facture->setSignature($fichierSignature);
+        }
+         
+
+       /*  $facture->setSignature($request->get('signature')); */
         $facture->setRemise($request->get('remise'));
         $facture->setMontantTotal($request->get('montantTotal'));
         $facture->setResteArgent($request->get('resteArgent'));
@@ -277,11 +300,20 @@ class ApiFactureController extends ApiInterface
 
         $paiement = new PaiementFacture();
         $paiement->setMontant($facture->getMontantTotal());
+        $paiement->setType('paiementFacture');
         $paiement->setReference($utils->generateReference('PMT'));
         $paiement->setCreatedBy($this->getUser());
         $paiement->setUpdatedBy($this->getUser());
         $paiement->setCreatedAtValue(new \DateTime());
         $facture->addPaiementFacture($paiement);
+
+        if ($request->get('avance') != null) {
+
+            $caisse =  $caisseSuccursaleRepository->findOneBy(['surccursale' => $this->getUser()->getSurccursale()]);
+
+            $caisse->setMontant((int)$caisse->getMontant() + (int)$request->get('avance'));
+            $caisse->setType('caisse_succursale');
+        }
 
         if ($errorResponse !== null) {
             return $errorResponse; // Retourne la réponse d'erreur si des erreurs sont présentes
@@ -364,6 +396,10 @@ class ApiFactureController extends ApiInterface
         Utils $utils
     ): Response {
         try {
+            if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
+            return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
+        }
+
             $data = json_decode($request->getContent(), true);
             $uploadedFiles = $request->files->get('mesures');
 
@@ -482,6 +518,10 @@ class ApiFactureController extends ApiInterface
     //#[Security(name: 'Bearer')]
     public function delete(Request $request, Facture $facture, FactureRepository $villeRepository): Response
     {
+        if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
+            return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
+        }
+
         try {
 
             if ($facture != null) {
@@ -519,6 +559,10 @@ class ApiFactureController extends ApiInterface
     #[Security(name: 'Bearer')]
     public function deleteAll(Request $request, FactureRepository $villeRepository): Response
     {
+        if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
+            return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
+        }
+
         try {
             $data = json_decode($request->getContent());
 

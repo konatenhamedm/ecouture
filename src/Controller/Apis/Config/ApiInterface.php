@@ -3,6 +3,10 @@
 namespace App\Controller\Apis\Config;
 
 use App\Controller\FileTrait;
+use App\Entity\Boutique;
+use App\Repository\BoutiqueRepository;
+use App\Repository\SettingRepository;
+use App\Repository\SurccursaleRepository;
 use App\Repository\UserRepository;
 use App\Service\Menu;
 use App\Service\SubscriptionChecker;
@@ -37,6 +41,9 @@ class ApiInterface extends AbstractController
     protected $subscriptionChecker;
     protected  $hasher;
     protected  $userRepository;
+    protected  $boutiqueRepository;
+    protected  $succursaleRe;
+    protected $settingRepository;
     protected  $utils;
     //protected  $utils;
     protected $em;
@@ -45,8 +52,20 @@ class ApiInterface extends AbstractController
 
     protected $serializer;
 
-    public function __construct(EntityManagerInterface $em,SluggerInterface $slugger,SubscriptionChecker $subscriptionChecker, Utils $utils,UserPasswordHasherInterface $hasher, HttpClientInterface $client, SerializerInterface $serializer, ValidatorInterface $validator, UserRepository $userRepository)
-    {
+    public function __construct(
+        EntityManagerInterface $em,
+        SluggerInterface $slugger,
+        SubscriptionChecker $subscriptionChecker,
+        Utils $utils,
+        UserPasswordHasherInterface $hasher,
+        BoutiqueRepository $boutiqueRepository,
+        SurccursaleRepository $surccursaleRepository,
+        SettingRepository $settingRepository,
+        HttpClientInterface $client,
+        SerializerInterface $serializer,
+        ValidatorInterface $validator,
+        UserRepository $userRepository
+    ) {
 
         $this->client = $client;
         $this->em = $em;
@@ -57,6 +76,43 @@ class ApiInterface extends AbstractController
         $this->hasher = $hasher;
         $this->subscriptionChecker = $subscriptionChecker;
         $this->slugger = $slugger;
+        $this->boutiqueRepository = $boutiqueRepository;
+        $this->succursaleRe = $surccursaleRepository;
+        $this->settingRepository = $settingRepository;
+    }
+
+    public function allParametres($type)
+    {
+        $entreprise = $this->getUser()->getEntreprise();
+        $setting = $this->settingRepository->findOneBy(
+            ['entreprise' => $entreprise],
+            ['id' => 'DESC']
+        );
+
+        if (!$setting) {
+            $this->errorResponse("Aucun paramètre trouvé");
+            return;
+        }
+        $limits = [
+            'user' => $setting->getNombreUser(),
+            'boutique' => $setting->getNombreBoutique(),
+            'succursale' => $setting->getNombreSuccursale()
+        ];
+
+        if (!array_key_exists($type, $limits)) {
+            $this->errorResponse("Type invalide");
+            return;
+        }
+
+        $counts = [
+            'user' => $this->userRepository->countActiveByEntreprise($entreprise),
+            'boutique' => $this->boutiqueRepository->countActiveByEntreprise($entreprise),
+            'succursale' => $this->succursaleRe->countActiveByEntreprise($entreprise)
+        ];
+
+        if ($counts[$type] >= $limits[$type]) {
+            $this->errorResponse("Limite atteinte");
+        }
     }
 
 
@@ -173,7 +229,7 @@ class ApiInterface extends AbstractController
                 'data' => $data,
                 'message' => $this->getMessage(),
                 'status' => $this->getStatusCode(),
-                    'errors' => []
+                'errors' => []
 
             ], 200);
             $response->headers->set('Access-Control-Allow-Origin', '*');
@@ -224,7 +280,7 @@ class ApiInterface extends AbstractController
                     'data' => json_decode($json),
                     'errors' => []
                 ], 200, $finalHeaders);
-                  $response->headers->set('Access-Control-Allow-Origin', '*');
+                $response->headers->set('Access-Control-Allow-Origin', '*');
             } else {
                 $response = new JsonResponse([
                     'code' => 200,
@@ -232,7 +288,7 @@ class ApiInterface extends AbstractController
                     'data' => [],
                     'errors' => []
                 ], 200, $finalHeaders);
-                  $response->headers->set('Access-Control-Allow-Origin', '*');
+                $response->headers->set('Access-Control-Allow-Origin', '*');
             }
         } catch (\Exception $e) {
             $response = new JsonResponse([
@@ -259,7 +315,7 @@ class ApiInterface extends AbstractController
                     'data' => json_decode($json),
                     'errors' => []
                 ], 200, $finalHeaders);
-                  $response->headers->set('Access-Control-Allow-Origin', '*');
+                $response->headers->set('Access-Control-Allow-Origin', '*');
             } else {
                 $response = new JsonResponse([
                     'code' => 200,
@@ -267,7 +323,7 @@ class ApiInterface extends AbstractController
                     'data' => [],
                     'errors' => []
                 ], 200, $finalHeaders);
-                  $response->headers->set('Access-Control-Allow-Origin', '*');
+                $response->headers->set('Access-Control-Allow-Origin', '*');
             }
         } catch (\Exception $e) {
             $response = new JsonResponse([
@@ -280,7 +336,7 @@ class ApiInterface extends AbstractController
         return $response;
     }
 
-    public function errorResponse($DTO,string $customMessage = ''): ?JsonResponse
+    public function errorResponse($DTO, string $customMessage = ''): ?JsonResponse
     {
         $errors = $this->validator->validate($DTO);
 
@@ -297,9 +353,9 @@ class ApiInterface extends AbstractController
                 'message' => 'Validation failed',
                 'errors' => $errorMessages
             ];
-            
+
             return new JsonResponse($response, 400);
-        }elseif ($customMessage != '') {
+        } elseif ($customMessage != '') {
             $errorMessages[] = $customMessage;
             $response = [
                 'code' => 400,
@@ -312,5 +368,21 @@ class ApiInterface extends AbstractController
 
         return null; // Pas d'erreurs, donc pas de réponse d'erreur
     }
+    public function errorResponseWithoutAbonnement(string $customMessage = ''): ?JsonResponse
+    {
+        $response = [
+                'code' => 400,
+                'message' => $customMessage,
+                'errors' => $customMessage
+            ];
 
+            return new JsonResponse($response, 400);
+    }
+
+    public function setMessageErrorAbonnement()
+    {
+         if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
+            return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
+        }
+    }
 }

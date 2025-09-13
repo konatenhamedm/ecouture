@@ -76,6 +76,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(["fichier", "group_pro","group1"])]
     private ?Fichier $logo = null;
 
+    #[ORM\ManyToOne(inversedBy: 'users')]
+    private ?Boutique $boutique = null;
+
 
     public function __construct()
     {
@@ -252,6 +255,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setLogo(?Fichier $logo): static
     {
         $this->logo = $logo;
+
+        return $this;
+    }
+
+    public function getBoutique(): ?Boutique
+    {
+        return $this->boutique;
+    }
+
+    public function setBoutique(?Boutique $boutique): static
+    {
+        $this->boutique = $boutique;
 
         return $this;
     }

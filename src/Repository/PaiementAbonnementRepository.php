@@ -16,6 +16,24 @@ class PaiementAbonnementRepository extends ServiceEntityRepository
         parent::__construct($registry, PaiementAbonnement::class);
     }
 
+        public function add(PaiementAbonnement $entity, bool $flush = false): void
+    {
+        $this->getEntityManager()->persist($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
+    public function remove(PaiementAbonnement $entity, bool $flush = false): void
+    {
+        $this->getEntityManager()->remove($entity);
+
+        if ($flush) {
+            $this->getEntityManager()->flush();
+        }
+    }
+
     //    /**
     //     * @return PaiementAbonnement[] Returns an array of PaiementAbonnement objects
     //     */

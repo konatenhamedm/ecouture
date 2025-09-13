@@ -71,6 +71,10 @@ class ApiCategorieMesureController extends ApiInterface
     // #[Security(name: 'Bearer')]
     public function indexAll(CategorieMesureRepository $moduleRepository): Response
     {
+        if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
+            return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
+        }
+
         try {
 
             $typeMesures = $moduleRepository->findBy(
@@ -113,6 +117,10 @@ class ApiCategorieMesureController extends ApiInterface
     //#[Security(name: 'Bearer')]
     public function getOne(?categorieMesure $categorieMesure)
     {
+        if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
+            return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
+        }
+
         try {
             if ($categorieMesure) {
                 $response = $this->response($categorieMesure);
@@ -157,6 +165,10 @@ class ApiCategorieMesureController extends ApiInterface
     #[Security(name: 'Bearer')]
     public function create(Request $request, CategorieMesureRepository $moduleRepository): Response
     {
+        if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
+            return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
+        }
+
 
         $data = json_decode($request->getContent(), true);
         $categorieMesure = new CategorieMesure();
@@ -199,6 +211,10 @@ class ApiCategorieMesureController extends ApiInterface
     #[Security(name: 'Bearer')]
     public function update(Request $request, CategorieMesure $categorieMesure, CategorieMesureRepository $moduleRepository): Response
     {
+        if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
+            return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
+        }
+
         try {
             $data = json_decode($request->getContent());
             if ($categorieMesure != null) {
@@ -283,6 +299,10 @@ class ApiCategorieMesureController extends ApiInterface
     #[Security(name: 'Bearer')]
     public function deleteAll(Request $request, CategorieMesureRepository $villeRepository): Response
     {
+        if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
+            return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
+        }
+
         try {
             $data = json_decode($request->getContent());
 

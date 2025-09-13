@@ -45,9 +45,9 @@ class AuthController extends ApiInterface
 
         if (!$user || !$hasher->isPasswordValid($user, $data['password'])) {
             return $this->json(['error' => 'Invalid credentials'], Response::HTTP_UNAUTHORIZED);
-        }elseif(!$user->isActive()){
+        } elseif (!$user->isActive()) {
 
-              return $this->errorResponse($user,'User is not active');
+            return $this->errorResponse($user, 'User is not active');
         }
 
         $token = $jwtService->generateToken([
@@ -57,7 +57,7 @@ class AuthController extends ApiInterface
         ]);
 
         $inactiveSubscriptions = $subscriptionChecker->checkInactiveSubscription($user->getEntreprise());
-         $activeSubscriptions = $subscriptionChecker->getActiveSubscription($user->getEntreprise());
+        $activeSubscriptions = $subscriptionChecker->getActiveSubscription($user->getEntreprise());
         /* dd($this->json([$activeSubscriptions])); */
 
         return $this->responseData([
@@ -67,7 +67,10 @@ class AuthController extends ApiInterface
                 'login' => $user->getLogin(),
                 'roles' => $user->getRoles(),
                 'is_active' => $user->isActive(),
-                'inactiveSubscriptions' => $inactiveSubscriptions,
+                /* 'inactiveSubscriptions' => $inactiveSubscriptions, */
+                'pays' => $user->getEntreprise()->getPays()->getId(),
+                'boutique' => $user->getBoutique() ? $user->getBoutique()->getId() : null,
+                'succursale' => $user->getSurccursale() ? $user->getSurccursale()->getId() : null,
                 'settings' =>  $settingRepository->findOneBy(['entreprise' => $user->getEntreprise()]),
                 'activeSubscriptions' => $activeSubscriptions
             ],

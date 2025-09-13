@@ -71,6 +71,10 @@ class ApiNotificationController extends ApiInterface
     // #[Security(name: 'Bearer')]
     public function indexAll(NotificationRepository $moduleRepository): Response
     {
+       /* if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
+            return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
+        } */
+
         try {
 
             $typeMesures = $moduleRepository->findBy(
@@ -108,6 +112,10 @@ class ApiNotificationController extends ApiInterface
     //#[Security(name: 'Bearer')]
     public function delete(Request $request, Notification $notification, NotificationRepository $villeRepository): Response
     {
+        if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
+            return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
+        }
+
         try {
 
             if ($notification != null) {
@@ -145,6 +153,10 @@ class ApiNotificationController extends ApiInterface
     #[Security(name: 'Bearer')]
     public function deleteAll(Request $request, NotificationRepository $villeRepository): Response
     {
+        if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
+            return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
+        }
+
         try {
             $data = json_decode($request->getContent());
 

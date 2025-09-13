@@ -32,6 +32,18 @@ class SurccursaleRepository extends ServiceEntityRepository
             $this->getEntityManager()->flush();
         }
     }
+
+    public function countActiveByEntreprise($entreprise): int
+    {
+        return $this->createQueryBuilder('s')
+            ->select('COUNT(u.id)')
+            ->where('s.active = :active')
+            ->andWhere('s.entreprise = :entreprise')
+            ->setParameter('active', true)
+            ->setParameter('entreprise', $entreprise)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
     //    /**
     //     * @return Surccursale[] Returns an array of Surccursale objects
     //     */

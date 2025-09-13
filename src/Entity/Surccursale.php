@@ -44,10 +44,17 @@ class Surccursale
      #[Groups(["group1", "group_type"])]
     private ?bool $active = true;
 
+    /**
+     * @var Collection<int, CaisseSuccursale>
+     */
+    #[ORM\OneToMany(targetEntity: CaisseSuccursale::class, mappedBy: 'succursale')]
+    private Collection $caisseSuccursales;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
         $this->clients = new ArrayCollection();
+        $this->caisseSuccursales = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -159,6 +166,36 @@ class Surccursale
     public function setActive(?bool $active): static
     {
         $this->active = $active;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, CaisseSuccursale>
+     */
+    public function getCaisseSuccursales(): Collection
+    {
+        return $this->caisseSuccursales;
+    }
+
+    public function addCaisseSuccursale(CaisseSuccursale $caisseSuccursale): static
+    {
+        if (!$this->caisseSuccursales->contains($caisseSuccursale)) {
+            $this->caisseSuccursales->add($caisseSuccursale);
+            $caisseSuccursale->setSuccursale($this);
+        }
+
+        return $this;
+    }
+
+    public function removeCaisseSuccursale(CaisseSuccursale $caisseSuccursale): static
+    {
+        if ($this->caisseSuccursales->removeElement($caisseSuccursale)) {
+            // set the owning side to null (unless already changed)
+            if ($caisseSuccursale->getSuccursale() === $this) {
+                $caisseSuccursale->setSuccursale(null);
+            }
+        }
 
         return $this;
     }

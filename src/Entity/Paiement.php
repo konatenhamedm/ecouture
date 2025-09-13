@@ -15,7 +15,13 @@ use Symfony\Component\Serializer\Annotation\Groups;
 #[ORM\Table(name:'paiement')]
 class Paiement
 {
-    
+    const TYPE = [
+        "paiementSuccursale" => "paiementSuccursale",
+        "paiementBoutique" => "paiementBoutique",
+        "paiementAbonnement" => "paiementAbonnement",
+        'paiementFacture' => 'paiementFacture',
+        'paiementReservation' => 'paiementReservation',
+    ];
     use TraitEntity;
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -30,6 +36,10 @@ class Paiement
     #[ORM\Column(length: 255)]
      #[Groups(["group1", "group_type"])]
     private ?string $reference = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+     #[Groups(["group1", "group_type"])]
+    private ?string $type = null;
 
 
 
@@ -58,6 +68,18 @@ class Paiement
     public function setReference(string $reference): static
     {
         $this->reference = $reference;
+
+        return $this;
+    }
+
+    public function getType(): ?string
+    {
+        return $this->type;
+    }
+
+    public function setType(?string $type): static
+    {
+        $this->type = $type;
 
         return $this;
     }
