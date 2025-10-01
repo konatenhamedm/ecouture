@@ -19,6 +19,7 @@ use App\Repository\BoutiqueRepository;
 use App\Repository\CaisseBoutiqueRepository;
 use App\Repository\CaisseSuccursaleRepository;
 use App\Repository\FactureRepository;
+use App\Repository\ModeleBoutiqueRepository;
 use App\Repository\PaiementFactureRepository;
 use App\Repository\TypeUserRepository;
 use App\Repository\UserRepository;
@@ -38,7 +39,7 @@ class ApiPaiementController extends ApiInterface
 
     #[Route('/', methods: ['GET'])]
     /**
-     * Retourne la liste des paiements.
+     * Retourne la liste de tout les paiements.
      * 
      */
     #[OA\Response(
@@ -70,7 +71,7 @@ class ApiPaiementController extends ApiInterface
 
     #[Route('/entreprise', methods: ['GET'])]
     /**
-     * Retourne la liste des typeMesures d'une entreprise.
+     * Retourne la liste des paiements d'une entreprise.
      * 
      */
     #[OA\Response(
@@ -90,7 +91,7 @@ class ApiPaiementController extends ApiInterface
         }
 
         try {
-            if ($this->getUser()->getType() == $typeUserRepository->findOneBy(['code' => 'ADM'])) {
+            if ($this->getUser()->getType() == $typeUserRepository->findOneBy(['code' => 'SADM'])) {
                 $paiements = $paiementRepository->findBy(
                     ['entreprise' => $this->getUser()->getEntreprise()],
                     ['id' => 'ASC']
@@ -167,8 +168,8 @@ class ApiPaiementController extends ApiInterface
      * Permet de créer un(e) paiement.
      */
     #[OA\Post(
-        summary: "Authentification admin",
-        description: "Génère un token JWT pour les administrateurs.",
+        summary: "Permet de créer un(e) paiement",
+        description: "Permet de créer un(e) paiement.",
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
@@ -221,24 +222,24 @@ class ApiPaiementController extends ApiInterface
 
         return  $this->responseDataWith_([
             'data' => $facture,
-            'inactiveSubscriptions' => $inactiveSubscriptions
+            //'inactiveSubscriptions' => $inactiveSubscriptions
         ], 'group1', ['Content-Type' => 'application/json']);;
     }
 
     #[Route('/boutique/{id}',  methods: ['POST'])]
     /**
-     * Permet de créer un(e) paiement simple dun modele.
+     * Permet de créer un(e) paiement simple dun modele d'une boutique. 
      */
     #[OA\Post(
-        summary: "Authentification admin",
-        description: "Génère un token JWT pour les administrateurs.",
+        summary: "Permet de créer un(e) paiement simple dun modele d'une boutique",
+        description: "Permet de créer un(e) paiement simple dun modele d'une boutique.",
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
                 properties: [
                     new OA\Property(property: "montant", type: "string"),
                     new OA\Property(property: "boutiqueId", type: "string"),
-                    new OA\Property(property: "modeleId", type: "string"),
+                    new OA\Property(property: "modeleBoutiqueId", type: "string"),
                     new OA\Property(property: "quantite", type: "string"),
 
                 ],
@@ -250,12 +251,13 @@ class ApiPaiementController extends ApiInterface
         ]
     )]
     #[OA\Tag(name: 'paiement')]
-    public function paiementBoutiqueModele(Request $request, Utils $utils, CaisseBoutiqueRepository $caisseBoutiqueRepository, BoutiqueRepository $boutiqueRepository,  FactureRepository $factureRepository, PaiementFactureRepository $paiementRepository): Response
+    public function paiementBoutiqueModele(Request $request, Utils $utils,ModeleBoutiqueRepository $modeleBoutiqueRepository, CaisseBoutiqueRepository $caisseBoutiqueRepository, BoutiqueRepository $boutiqueRepository,  FactureRepository $factureRepository, PaiementFactureRepository $paiementRepository): Response
     {
 
         if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
             return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
         }
+
         $data = json_decode($request->getContent(), true);
         $paiement = new PaiementBoutique();
         $paiement->setMontant($data['montant']);
@@ -274,9 +276,11 @@ class ApiPaiementController extends ApiInterface
 
         $errorResponse = $this->errorResponse($paiement);
         if ($errorResponse !== null) {
-            return $errorResponse; // Retourne la réponse d'erreur si des erreurs sont présentes
+            return $errorResponse; 
         } else {
-
+            $modeleBoutique = $modeleBoutiqueRepository->findOneBy(['id' => $data['modeleBoutiqueId']]);
+            $modeleBoutique->setQuantite((int)$modeleBoutique->getQuantite() - (int)$data['quantite']);
+            $modeleBoutiqueRepository->add($modeleBoutique, true);
             $paiementRepository->add($paiement, true);
 
             $caisseBoutiqueRepository->add($caisse, true);
@@ -284,7 +288,7 @@ class ApiPaiementController extends ApiInterface
 
         return  $this->responseDataWith_([
             'data' => $paiement,
-            'inactiveSubscriptions' => $inactiveSubscriptions
+           /*  'inactiveSubscriptions' => $inactiveSubscriptions */
         ], 'group1', ['Content-Type' => 'application/json']);;
     }
 

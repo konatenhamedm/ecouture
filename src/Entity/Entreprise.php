@@ -114,6 +114,12 @@ class Entreprise
     #[ORM\OneToMany(targetEntity: Reservation::class, mappedBy: 'entreprise')]
     private Collection $reservations;
 
+    /**
+     * @var Collection<int, EntreStock>
+     */
+    #[ORM\OneToMany(targetEntity: EntreStock::class, mappedBy: 'entreprise')]
+    private Collection $entreStocks;
+
     public function __construct()
     {
         $this->categorieMesures = new ArrayCollection();
@@ -128,6 +134,7 @@ class Entreprise
         $this->modeles = new ArrayCollection();
         $this->caisses = new ArrayCollection();
         $this->reservations = new ArrayCollection();
+        $this->entreStocks = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -551,6 +558,36 @@ class Entreprise
             // set the owning side to null (unless already changed)
             if ($reservation->getEntreprise() === $this) {
                 $reservation->setEntreprise(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, EntreStock>
+     */
+    public function getEntreStocks(): Collection
+    {
+        return $this->entreStocks;
+    }
+
+    public function addEntreStock(EntreStock $entreStock): static
+    {
+        if (!$this->entreStocks->contains($entreStock)) {
+            $this->entreStocks->add($entreStock);
+            $entreStock->setEntreprise($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEntreStock(EntreStock $entreStock): static
+    {
+        if ($this->entreStocks->removeElement($entreStock)) {
+            // set the owning side to null (unless already changed)
+            if ($entreStock->getEntreprise() === $this) {
+                $entreStock->setEntreprise(null);
             }
         }
 

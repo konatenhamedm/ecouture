@@ -23,13 +23,30 @@ class AuthController extends ApiInterface
 
     #[Route('/api/login', methods: ['POST'])]
     #[OA\Post(
-        summary: "Login for a user",
-        description: "login for a user",
+        summary: "Permet d'authentifier un utilisateur",
+        description: "Permet d'authentifier un utilisateur",
         requestBody: new OA\RequestBody(
             required: true,
-            content: new OA\JsonContent(properties: [new OA\Property(property: "login", type: "string"), new OA\Property(property: "password", type: "string"),], type: "object")
+            content: new OA\JsonContent(
+                type: "object",
+                properties: [
+                    new OA\Property(
+                        property: "login",
+                        type: "string",
+                        default: "0101564767" 
+                    ),
+                    new OA\Property(
+                        property: "password",
+                        type: "string",
+                        default: "admin93K" 
+                    ),
+                ]
+            )
         ),
-        /* responses: [ new OA\Response(response: 401, description: "Invalid credentials") ] */
+        responses: [
+            new OA\Response(response: 401, description: "Invalid credentials"),
+            new OA\Response(response: 200, description: "Success")
+        ]
     )]
     #[OA\Tag(name: 'auth')]
     public function login(

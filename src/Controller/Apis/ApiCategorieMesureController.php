@@ -37,13 +37,14 @@ class ApiCategorieMesureController extends ApiInterface
     // #[Security(name: 'Bearer')]
     public function index(CategorieMesureRepository $moduleRepository): Response
     {
+        //dd($this->getUser());
         try {
 
-            $categories = $moduleRepository->findAll();
+            $categories = $this->paginationService->paginate($moduleRepository->findAll());
+            /* dd($categories); */
 
-          
 
-            $response =  $this->responseData($categories, 'group1', ['Content-Type' => 'application/json']);
+            $response =  $this->responseData($categories, 'group1', ['Content-Type' => 'application/json'], true);
         } catch (\Exception $exception) {
             $this->setMessage("");
             $response = $this->response('[]');
@@ -54,7 +55,7 @@ class ApiCategorieMesureController extends ApiInterface
     }
 
 
-     #[Route('/entreprise', methods: ['GET'])]
+    #[Route('/entreprise', methods: ['GET'])]
     /**
      * Retourne la liste des typeMesures d'une entreprise.
      * 
@@ -82,7 +83,7 @@ class ApiCategorieMesureController extends ApiInterface
                 ['id' => 'ASC']
             );
 
-          
+
 
             $response =  $this->responseData($typeMesures, 'group1', ['Content-Type' => 'application/json']);
         } catch (\Exception $exception) {
@@ -93,7 +94,7 @@ class ApiCategorieMesureController extends ApiInterface
         // On envoie la réponse
         return $response;
     }
-   
+
 
 
     #[Route('/get/one/{id}', methods: ['GET'])]
@@ -144,8 +145,8 @@ class ApiCategorieMesureController extends ApiInterface
      * Permet de créer un(e) categorieMesure.
      */
     #[OA\Post(
-        summary: "Authentification admin",
-        description: "Génère un token JWT pour les administrateurs.",
+        summary: "Permet de créer un(e) categorieMesure.",
+        description: "Permet de créer un(e) categorieMesure..",
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
@@ -189,15 +190,15 @@ class ApiCategorieMesureController extends ApiInterface
 
     #[Route('/update/{id}', methods: ['PUT', 'POST'])]
     #[OA\Post(
-        summary: "Creation de categorieMesure",
-        description: "Permet de créer un categorieMesure.",
+        summary: "Permet de mettre a jour un categorieMesure.",
+        description: "Permet de mettre a jour un categorieMesure.",
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
                 properties: [
                     new OA\Property(property: "libelle", type: "string"),
                     new OA\Property(property: "code", type: "string"),
-                    
+
 
                 ],
                 type: "object"

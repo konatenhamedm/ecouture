@@ -55,7 +55,7 @@ class ApiModeleController extends ApiInterface
         // On envoie la réponse
         return $response;
     }
-   
+
 
     #[Route('/entreprise', methods: ['GET'])]
     /**
@@ -79,7 +79,7 @@ class ApiModeleController extends ApiInterface
         }
 
         try {
-            if ($this->getUser()->getType() == $typeUserRepository->findOneBy(['code' => 'ADM'])) {
+            if ($this->getUser()->getType() == $typeUserRepository->findOneBy(['code' => 'SADM'])) {
 
 
                 $modeles = $modeleRepository->findBy(
@@ -153,8 +153,8 @@ class ApiModeleController extends ApiInterface
      * Permet de créer un(e) modele.
      */
     #[OA\Post(
-        summary: "Authentification admin",
-        description: "Génère un token JWT pour les administrateurs.",
+        summary: "Permet de créer un(e) modele.",
+        description: "Permet de créer un(e) modele.",
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\MediaType(
@@ -186,11 +186,11 @@ class ApiModeleController extends ApiInterface
         $filePath = $this->getUploadDir(self::UPLOAD_PATH, true);
         $data = json_decode($request->getContent(), true);
 
-        
+
         $modele = new Modele();
         $modele->setLibelle($request->get('libelle'));
         $modele->setQuantiteGlobale($request->get('quantite'));
-        
+
         $uploadedFile = $request->files->get('photo');
 
         if ($uploadedFile) {
@@ -214,8 +214,8 @@ class ApiModeleController extends ApiInterface
 
     #[Route('/update/{id}', methods: ['PUT', 'POST'])]
     #[OA\Post(
-        summary: "Authentification admin",
-        description: "Génère un token JWT pour les administrateurs.",
+        summary: "Permet de mettre à jour un(e) modele.",
+        description: "Permet de mettre à jour un(e) modele.",
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\MediaType(
@@ -264,12 +264,10 @@ class ApiModeleController extends ApiInterface
                 $errorResponse = $this->errorResponse($modele);
 
                 if ($errorResponse !== null) {
-                    return $errorResponse; // Retourne la réponse d'erreur si des erreurs sont présentes
+                    return $errorResponse; 
                 } else {
                     $modeleRepository->add($modele, true);
                 }
-
-
 
                 // On retourne la confirmation
                 $response = $this->responseData($modele, 'group1', ['Content-Type' => 'application/json']);

@@ -198,7 +198,7 @@ class ApiUserController extends ApiInterface
             $user->setIsActive(true);
             $user->setPassword($this->hasher->hashPassword($user,  $data['password']));
             $user->setRoles(['ROLE_ADMIN']);
-            $user->setType($typeUserRepository->findOneBy(['code' => 'ADM']));
+            $user->setType($typeUserRepository->findOneBy(['code' => 'SADM']));
 
 
             /*   $entreprise->addUser($user); */

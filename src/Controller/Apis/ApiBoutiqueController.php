@@ -81,14 +81,14 @@ class ApiBoutiqueController extends ApiInterface
         }
 
         try {
-            if ($this->getUser()->getType() == $typeUserRepository->findOneBy(['code' => 'ADM'])) {
+            if ($this->getUser()->getType() == $typeUserRepository->findOneBy(['code' => 'SADM'])) {
                 $boutiques = $boutiqueRepository->findBy(
                     ['entreprise' => $this->getUser()->getEntreprise()],
                     ['id' => 'ASC']
                 );
             } else {
                 $boutiques = $boutiqueRepository->findBy(
-                    ['surccursale' => $this->getUser()->getSurccursale()],
+                    ['id' => $this->getUser()->getBoutique()],
                     ['id' => 'ASC']
                 );
             }
@@ -181,6 +181,7 @@ class ApiBoutiqueController extends ApiInterface
         $boutique->setLibelle($data['libelle']);
         $boutique->setSituation($data['situation']);
         $boutique->setContact($data['contact']);
+        $boutique->setIsActive(true);
 
         $boutique->setCreatedBy($this->getUser());
         $boutique->setUpdatedBy($this->getUser());

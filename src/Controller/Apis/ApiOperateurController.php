@@ -133,15 +133,15 @@ class ApiOperateurController extends ApiInterface
 
     #[Route('/create', methods: ['POST'])]
     #[OA\Post(
-        summary: "Création de civilité",
-        description: "Permet de créer une civilité.",
+        summary: "Création d'une operateur.",
+        description: "Création d'une operateur.",
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\MediaType(
                 mediaType: "multipart/form-data",
                 schema: new OA\Schema(
                     type: "object",
-                    required: ["libelle", "code", "userUpdate"],
+                    required: ["libelle", "code"],
                     properties: [
                         new OA\Property(property: "libelle", type: "string"),
                         new OA\Property(property: "code", type: "string"),
@@ -196,8 +196,8 @@ class ApiOperateurController extends ApiInterface
 
     #[Route('/update/{id}', methods: ['PUT', 'POST'])]
     #[OA\Post(
-        summary: "Mise à jour de civilité",
-        description: "Permet de mettre à jour une civilité.",
+        summary: "Mise à jour de operateur.",
+        description: "Mise à jour de operateur.",
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\MediaType(

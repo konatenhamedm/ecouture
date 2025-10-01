@@ -77,14 +77,14 @@ class ApiBoutiqueController extends ApiInterface
     public function indexAll(BoutiqueRepository $boutiqueRepository, TypeUserRepository $typeUserRepository): Response
     {
         try {
-            if ($this->getUser()->getType() == $typeUserRepository->findOneBy(['code' => 'ADM'])) {
+            if ($this->getUser()->getType() == $typeUserRepository->findOneBy(['code' => 'SADM'])) {
                 $boutiques = $boutiqueRepository->findBy(
-                    ['entreprise' => $this->getUser()->getEntreprise()],
+                    ['entreprise' => $this->getUser()->getEntreprise(),'active' => true],
                     ['id' => 'ASC']
                 );
             } else {
                 $boutiques = $boutiqueRepository->findBy(
-                    ['surccursale' => $this->getUser()->getSurccursale()],
+                    ['surccursale' => $this->getUser()->getSurccursale(),'active' => true],
                     ['id' => 'ASC']
                 );
             }

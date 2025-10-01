@@ -27,7 +27,7 @@ class ApiAbonnementController extends ApiInterface
 
     #[Route('/', methods: ['GET'])]
     /**
-     * Retourne la liste des abonnements.
+     * Retourne la liste de tout les  abonnements.
      * 
      */
     #[OA\Response(
@@ -68,9 +68,9 @@ class ApiAbonnementController extends ApiInterface
             items: new OA\Items(ref: new AttributeModel(type: Abonnement::class, groups: ['full']))
         )
     )]
-    #[OA\Tag(name: 'abonnement')]
+    //#[OA\Tag(name: 'abonnement')]
     // #[Security(name: 'Bearer')]
-    public function showActiveInfoAbonnement(AbonnementRepository $moduleRepository): Response
+/*     public function showActiveInfoAbonnement(AbonnementRepository $moduleRepository): Response
     {
         try {
 
@@ -84,15 +84,15 @@ class ApiAbonnementController extends ApiInterface
 
         // On envoie la réponse
         return $response;
-    }
+    } */
 
     #[Route('/abonnement/{id}',  methods: ['POST'])]
     /**
      * Permet de crtéer un(e) abonnement.
      */
     #[OA\Post(
-        summary: "Authentification admin",
-        description: "Génère un token JWT pour les administrateurs.",
+        summary: "Permet de crtéer un(e) abonnement",
+        description: "Permet de crtéer un(e) abonnement.",
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
@@ -148,7 +148,7 @@ class ApiAbonnementController extends ApiInterface
 
      #[Route('/entreprise', methods: ['GET'])]
     /**
-     * Retourne la liste des abonnements d'une entreprise.
+     * Retourne la liste les abonnements d'une entreprise.
      * 
      */
     #[OA\Response(
@@ -184,7 +184,7 @@ class ApiAbonnementController extends ApiInterface
 
      #[Route('/entreprise/actif', methods: ['GET'])]
     /**
-     * Retourne la liste des typeMesures d'une entreprise.
+     * Retourne la liste des abonnements actifs d'une entreprise.
      * 
      */
     #[OA\Response(

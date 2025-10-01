@@ -96,7 +96,7 @@ class ApiModeleBoutiqueController extends ApiInterface
     }
 
 
-    #[Route('/entreprise', methods: ['GET'])]
+    #[Route('/entreprise/{boutique}', methods: ['GET'])]
     /**
      * Retourne la liste des typeMesures d'une entreprise.
      * 
@@ -111,23 +111,22 @@ class ApiModeleBoutiqueController extends ApiInterface
     )]
     #[OA\Tag(name: 'modeleBoutique')]
     // #[Security(name: 'Bearer')]
-    public function indexAll(ModeleBoutiqueRepository $modeleBoutiqueRepository, TypeUserRepository $typeUserRepository): Response
+    public function indexAll(ModeleBoutiqueRepository $modeleBoutiqueRepository, TypeUserRepository $typeUserRepository,$boutique): Response
     {
         if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
             return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
         }
 
         try {
-            if ($this->getUser()->getType() == $typeUserRepository->findOneBy(['code' => 'ADM'])) {
-
+            if ($this->getUser()->getType() == $typeUserRepository->findOneBy(['code' => 'SADM'])) {
 
                 $modeleBoutiques = $modeleBoutiqueRepository->findBy(
-                    ['entreprise' => $this->getUser()->getEntreprise()],
+                    ['boutique' => $boutique],
                     ['id' => 'ASC']
                 );
             } else {
                 $modeleBoutiques = $modeleBoutiqueRepository->findBy(
-                    ['surccursale' => $this->getUser()->getSurccursale()],
+                    ['boutique' => $this->getUser()->getBoutique()],
                     ['id' => 'ASC']
                 );
             }
@@ -242,8 +241,8 @@ class ApiModeleBoutiqueController extends ApiInterface
 
     #[Route('/update/{id}', methods: ['PUT', 'POST'])]
     #[OA\Post(
-        summary: "Authentification admin",
-        description: "Génère un token JWT pour les administrateurs.",
+        summary: "Permet de modifier un(e) modeleBoutique.",
+        description: "Permet de modifier un(e) modeleBoutique.",
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(

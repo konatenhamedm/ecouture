@@ -180,8 +180,8 @@ class ApiSurccursaleController extends ApiInterface
      * Permet de créer un(e) surccursale.
      */
     #[OA\Post(
-        summary: "Authentification admin",
-        description: "Génère un token JWT pour les administrateurs.",
+        summary: "Permet de créer un(e) surccursale",
+        description: "Permet de créer un(e) surccursale.",
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
@@ -210,6 +210,7 @@ class ApiSurccursaleController extends ApiInterface
         $surccursale = new Surccursale();
         $surccursale->setLibelle($data['libelle']);
         $surccursale->setContact($data['contact']);
+        $surccursale->setIsActive(true);
         $surccursale->setEntreprise($this->getUser()->getEntreprise());
         $surccursale->setCreatedBy($this->getUser());
         $surccursale->setUpdatedBy($this->getUser());

@@ -41,7 +41,7 @@ class Setting
     private ?int $nombreJourRestantPourEnvoyerSms = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
-     #[Groups(["group1", "group_type"])]
+     #[Groups(["group11", "group_type"])]
     private ?string $modeleMessageEnvoyerPourRendezVousProche = null;
 
     #[ORM\Column]

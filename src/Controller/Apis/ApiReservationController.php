@@ -20,6 +20,7 @@ use App\Repository\CaisseRepository;
 use App\Repository\ReservationRepository;
 use App\Repository\CaisseReservationRepository;
 use App\Repository\ClientRepository;
+use App\Repository\ModeleBoutiqueRepository;
 use App\Repository\ModeleRepository;
 use App\Repository\PaiementReservationRepository;
 use App\Repository\TypeUserRepository;
@@ -73,7 +74,7 @@ class ApiReservationController extends ApiInterface
 
     #[Route('/entreprise', methods: ['GET'])]
     /**
-     * Retourne la liste des typeMesures d'une entreprise.
+     * Retourne la liste des reservations d'une entreprise.
      * 
      */
     #[OA\Response(
@@ -89,7 +90,7 @@ class ApiReservationController extends ApiInterface
     public function indexAll(ReservationRepository $reservationRepository, TypeUserRepository $typeUserRepository): Response
     {
         try {
-            if ($this->getUser()->getType() == $typeUserRepository->findOneBy(['code' => 'ADM'])) {
+            if ($this->getUser()->getType() == $typeUserRepository->findOneBy(['code' => 'SADM'])) {
                 $reservations = $reservationRepository->findBy(
                     ['entreprise' => $this->getUser()->getEntreprise()],
                     ['id' => 'ASC']
@@ -155,8 +156,8 @@ class ApiReservationController extends ApiInterface
      * Permet de créer un(e) reservation.
      */
     #[OA\Post(
-        summary: "Authentification admin",
-        description: "Génère un token JWT pour les administrateurs.",
+        summary: "Permet de créer un(e) reservation",
+        description: "Permet de créer un(e) reservation.",
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(
@@ -190,7 +191,7 @@ class ApiReservationController extends ApiInterface
         ]
     )]
     #[OA\Tag(name: 'reservation')]
-    public function create(Request $request, CaisseBoutiqueRepository $caisseBoutiqueRepository, PaiementReservationRepository $paiementReservationRepository, ModeleRepository $modeleRepository, ClientRepository $clientRepository, BoutiqueRepository $boutiqueRepository, Utils $utils, ReservationRepository $reservationRepository): Response
+    public function create(Request $request,ModeleBoutiqueRepository $modeleBoutiqueRepository, CaisseBoutiqueRepository $caisseBoutiqueRepository, PaiementReservationRepository $paiementReservationRepository, ModeleRepository $modeleRepository, ClientRepository $clientRepository, BoutiqueRepository $boutiqueRepository, Utils $utils, ReservationRepository $reservationRepository): Response
     {
         if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
             return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
@@ -214,7 +215,7 @@ class ApiReservationController extends ApiInterface
         foreach ($data['ligne'] as $key => $value) {
             $ligne = new LigneReservation();
             $ligne->setQuantite($value['quantite']);
-            $ligne->setModele($modeleRepository->findOneBy(['id' => $value['modele']]));
+            $ligne->setModele($modeleBoutiqueRepository->findOneBy(['id' => $value['modele']]));
             $ligne->setCreatedAtValue(new \DateTime());
             $ligne->setCreatedBy($this->getUser());
             $ligne->setUpdatedBy($this->getUser());
@@ -306,6 +307,7 @@ class ApiReservationController extends ApiInterface
         BoutiqueRepository $boutiqueRepository,
         CaisseBoutiqueRepository $caisseBoutiqueRepository,
         ModeleRepository $modeleRepository,
+        ModeleBoutiqueRepository $modeleBoutiqueRepository,
         PaiementReservationRepository $paiementReservationRepository,
         Utils $utils
     ): Response {
@@ -335,7 +337,7 @@ class ApiReservationController extends ApiInterface
                 foreach ($data['ligne'] as $value) {
                     $ligne = new LigneReservation();
                     $ligne->setQuantite($value['quantite']);
-                    $ligne->setModele($modeleRepository->find($value['modele']));
+                    $ligne->setModele($modeleBoutiqueRepository->find($value['modele']));
                     $ligne->setCreatedAtValue(new \DateTime());
                     $ligne->setCreatedBy($this->getUser());
                     $ligne->setUpdatedBy($this->getUser());

@@ -9,9 +9,11 @@ use App\Repository\SettingRepository;
 use App\Repository\SurccursaleRepository;
 use App\Repository\UserRepository;
 use App\Service\Menu;
+use App\Service\PaginationService;
 use App\Service\SubscriptionChecker;
 use App\Service\Utils;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\Pagination\PaginationInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -64,7 +66,8 @@ class ApiInterface extends AbstractController
         HttpClientInterface $client,
         SerializerInterface $serializer,
         ValidatorInterface $validator,
-        UserRepository $userRepository
+        UserRepository $userRepository,
+        protected PaginationService $paginationService,
     ) {
 
         $this->client = $client;
@@ -266,7 +269,7 @@ class ApiInterface extends AbstractController
         ], 200);
     }
 
-    public function responseData($data = [], $group = null, $headers = [])
+    /*  public function responseData($data = [], $group = null, $headers = [])
     {
         try {
 
@@ -290,6 +293,57 @@ class ApiInterface extends AbstractController
                 ], 200, $finalHeaders);
                 $response->headers->set('Access-Control-Allow-Origin', '*');
             }
+        } catch (\Exception $e) {
+            $response = new JsonResponse([
+                'code' => 500,
+                'message' => $e->getMessage(),
+                'data' => []
+            ], 500, $finalHeaders);
+        }
+
+        return $response;
+    } */
+
+    public function responseData(
+        $data = [],
+        $group = null,
+        $headers = [],
+        bool $paginate = false
+    ): JsonResponse {
+        try {
+            $finalHeaders = empty($headers) ? ['Content-Type' => 'application/json'] : $headers;
+
+            $context = [AbstractNormalizer::GROUPS => $group];
+
+            // Cas paginé (KnpPaginator ou PaginationInterface)
+            if ($paginate && $data instanceof PaginationInterface) {
+                $items = $this->serializer->serialize($data->getItems(), 'json', $context);
+
+                $response = new JsonResponse([
+                    'code' => 200,
+                    'message' => $this->getMessage(),
+                    'data' => json_decode($items),
+                    'pagination' => [
+                        'currentPage' => $data->getCurrentPageNumber(),
+                        'totalItems'  => $data->getTotalItemCount(),
+                        'itemsPerPage' => $data->getItemNumberPerPage(),
+                        'totalPages'  => ceil($data->getTotalItemCount() / $data->getItemNumberPerPage())
+                    ],
+                    'errors' => []
+                ], 200, $finalHeaders);
+            } else {
+                // Cas normal (array ou collection simple)
+                $json = $this->serializer->serialize($data, 'json', $context);
+
+                $response = new JsonResponse([
+                    'code' => 200,
+                    'message' => $this->getMessage(),
+                    'data' => json_decode($json),
+                    'errors' => []
+                ], 200, $finalHeaders);
+            }
+
+            $response->headers->set('Access-Control-Allow-Origin', '*');
         } catch (\Exception $e) {
             $response = new JsonResponse([
                 'code' => 500,
@@ -371,17 +425,17 @@ class ApiInterface extends AbstractController
     public function errorResponseWithoutAbonnement(string $customMessage = ''): ?JsonResponse
     {
         $response = [
-                'code' => 400,
-                'message' => $customMessage,
-                'errors' => $customMessage
-            ];
+            'code' => 400,
+            'message' => $customMessage,
+            'errors' => $customMessage
+        ];
 
-            return new JsonResponse($response, 400);
+        return new JsonResponse($response, 400);
     }
 
     public function setMessageErrorAbonnement()
     {
-         if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
+        if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
             return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
         }
     }

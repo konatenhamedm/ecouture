@@ -73,12 +73,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\ManyToOne(cascade: ["persist"], fetch: "EAGER")]
     #[ORM\JoinColumn(nullable: true)]
-    #[Groups(["fichier", "group_pro","group1"])]
+    #[Groups(["fichier", "group_pro", "group1"])]
     private ?Fichier $logo = null;
 
     #[ORM\ManyToOne(inversedBy: 'users')]
     private ?Boutique $boutique = null;
 
+
+    #[OA\Property(description: 'Token de réinitialisation simple (6 chiffres)', type: 'string', example: '123456')]
+    #[ORM\Column(type: "string", length: 6, nullable: true)]
+    private ?string $plainResetToken = null;
+
+    #[OA\Property(description: 'Date d\'expiration du token simple', type: 'string', format: 'date-time')]
+    #[ORM\Column(type: "datetime_immutable", nullable: true)]
+    private ?\DateTimeImmutable $plainTokenExpiresAt = null;
 
     public function __construct()
     {
@@ -268,6 +276,28 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->boutique = $boutique;
 
+        return $this;
+    }
+
+    public function getPlainResetToken(): ?string
+    {
+        return $this->plainResetToken;
+    }
+
+    public function setPlainResetToken(?string $plainResetToken): self
+    {
+        $this->plainResetToken = $plainResetToken;
+        return $this;
+    }
+
+    public function getPlainTokenExpiresAt(): ?\DateTimeImmutable
+    {
+        return $this->plainTokenExpiresAt;
+    }
+
+    public function setPlainTokenExpiresAt(?\DateTimeImmutable $plainTokenExpiresAt): self
+    {
+        $this->plainTokenExpiresAt = $plainTokenExpiresAt;
         return $this;
     }
 }

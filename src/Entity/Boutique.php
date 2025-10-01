@@ -6,6 +6,7 @@ use App\Repository\BoutiqueRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: BoutiqueRepository::class)]
 class Boutique
@@ -16,19 +17,24 @@ class Boutique
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+     #[Groups(["group1", "group_type"])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+     #[Groups(["group1", "group_type"])]
     private ?string $libelle = null;
 
     #[ORM\Column(length: 255)]
+     #[Groups(["group1", "group_type"])]
     private ?string $contact = null;
 
     #[ORM\Column(length: 255)]
+     #[Groups(["group1", "group_type"])]
     private ?string $situation = null;
 
     #[ORM\Column]
-    private ?bool $actif = null;
+     #[Groups(["group1", "group_type"])]
+    private ?bool $isActive = null;
 
     #[ORM\ManyToOne(inversedBy: 'boutiques')]
     private ?Entreprise $entreprise = null;
@@ -63,6 +69,12 @@ class Boutique
     #[ORM\OneToMany(targetEntity: Reservation::class, mappedBy: 'boutique')]
     private Collection $reservations;
 
+    /**
+     * @var Collection<int, EntreStock>
+     */
+    #[ORM\OneToMany(targetEntity: EntreStock::class, mappedBy: 'boutique')]
+    private Collection $entreStocks;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
@@ -70,6 +82,7 @@ class Boutique
         $this->paiementBoutiques = new ArrayCollection();
         $this->caisseBoutiques = new ArrayCollection();
         $this->reservations = new ArrayCollection();
+        $this->entreStocks = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -113,14 +126,14 @@ class Boutique
         return $this;
     }
 
-    public function isActif(): ?bool
+    public function isActive(): ?bool
     {
-        return $this->actif;
+        return $this->isActive;
     }
 
-    public function setActif(bool $actif): static
+    public function setIsActive(bool $actif): static
     {
-        $this->actif = $actif;
+        $this->isActive = $actif;
 
         return $this;
     }
@@ -281,6 +294,36 @@ class Boutique
             // set the owning side to null (unless already changed)
             if ($reservation->getBoutique() === $this) {
                 $reservation->setBoutique(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, EntreStock>
+     */
+    public function getEntreStocks(): Collection
+    {
+        return $this->entreStocks;
+    }
+
+    public function addEntreStock(EntreStock $entreStock): static
+    {
+        if (!$this->entreStocks->contains($entreStock)) {
+            $this->entreStocks->add($entreStock);
+            $entreStock->setBoutique($this);
+        }
+
+        return $this;
+    }
+
+    public function removeEntreStock(EntreStock $entreStock): static
+    {
+        if ($this->entreStocks->removeElement($entreStock)) {
+            // set the owning side to null (unless already changed)
+            if ($entreStock->getBoutique() === $this) {
+                $entreStock->setBoutique(null);
             }
         }
 

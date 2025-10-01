@@ -42,16 +42,13 @@ class Modele
     #[ORM\ManyToOne(inversedBy: 'modeles')]
     private ?Entreprise $entreprise = null;
 
-    /**
-     * @var Collection<int, LigneReservation>
-     */
-    #[ORM\OneToMany(targetEntity: LigneReservation::class, mappedBy: 'modele')]
-    private Collection $ligneReservations;
+
 
     public function __construct()
     {
         $this->modeleBoutiques = new ArrayCollection();
-        $this->ligneReservations = new ArrayCollection();
+       
+
     }
 
 
@@ -139,33 +136,7 @@ class Modele
         return $this;
     }
 
-    /**
-     * @return Collection<int, LigneReservation>
-     */
-    public function getLigneReservations(): Collection
-    {
-        return $this->ligneReservations;
-    }
+    
 
-    public function addLigneReservation(LigneReservation $ligneReservation): static
-    {
-        if (!$this->ligneReservations->contains($ligneReservation)) {
-            $this->ligneReservations->add($ligneReservation);
-            $ligneReservation->setModele($this);
-        }
-
-        return $this;
-    }
-
-    public function removeLigneReservation(LigneReservation $ligneReservation): static
-    {
-        if ($this->ligneReservations->removeElement($ligneReservation)) {
-            // set the owning side to null (unless already changed)
-            if ($ligneReservation->getModele() === $this) {
-                $ligneReservation->setModele(null);
-            }
-        }
-
-        return $this;
-    }
+    
 }

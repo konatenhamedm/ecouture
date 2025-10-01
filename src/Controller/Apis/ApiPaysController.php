@@ -131,8 +131,8 @@ class ApiPaysController extends ApiInterface
      * Permet de créer un(e) pays.
      */
     #[OA\Post(
-        summary: "Authentification admin",
-        description: "Génère un token JWT pour les administrateurs.",
+        summary: "Permet de créer un(e) pays",
+        description: "Permet de créer un(e) pays.",
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\JsonContent(

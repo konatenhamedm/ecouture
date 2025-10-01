@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\ModeleBoutiqueRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Serializer\Annotation\Groups;
@@ -33,6 +35,24 @@ class ModeleBoutique
 
     #[ORM\ManyToOne(inversedBy: 'modeleBoutiques')]
     private ?Boutique $boutique = null;
+
+    /**
+     * @var Collection<int, LigneEntre>
+     */
+    #[ORM\OneToMany(targetEntity: LigneEntre::class, mappedBy: 'modele')]
+    private Collection $ligneEntres;
+
+    /**
+     * @var Collection<int, LigneReservation>
+     */
+    #[ORM\OneToMany(targetEntity: LigneReservation::class, mappedBy: 'modele')]
+    private Collection $ligneReservations;
+
+    public function __construct()
+    {
+        $this->ligneEntres = new ArrayCollection();
+        $this->ligneReservations = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -83,6 +103,66 @@ class ModeleBoutique
     public function setBoutique(?Boutique $boutique): static
     {
         $this->boutique = $boutique;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, LigneEntre>
+     */
+    public function getLigneEntres(): Collection
+    {
+        return $this->ligneEntres;
+    }
+
+    public function addLigneEntre(LigneEntre $ligneEntre): static
+    {
+        if (!$this->ligneEntres->contains($ligneEntre)) {
+            $this->ligneEntres->add($ligneEntre);
+            $ligneEntre->setModele($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLigneEntre(LigneEntre $ligneEntre): static
+    {
+        if ($this->ligneEntres->removeElement($ligneEntre)) {
+            // set the owning side to null (unless already changed)
+            if ($ligneEntre->getModele() === $this) {
+                $ligneEntre->setModele(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, LigneReservation>
+     */
+    public function getLigneReservations(): Collection
+    {
+        return $this->ligneReservations;
+    }
+
+    public function addLigneReservation(LigneReservation $ligneReservation): static
+    {
+        if (!$this->ligneReservations->contains($ligneReservation)) {
+            $this->ligneReservations->add($ligneReservation);
+            $ligneReservation->setModele($this);
+        }
+
+        return $this;
+    }
+
+    public function removeLigneReservation(LigneReservation $ligneReservation): static
+    {
+        if ($this->ligneReservations->removeElement($ligneReservation)) {
+            // set the owning side to null (unless already changed)
+            if ($ligneReservation->getModele() === $this) {
+                $ligneReservation->setModele(null);
+            }
+        }
 
         return $this;
     }

@@ -42,7 +42,7 @@ class Surccursale
 
     #[ORM\Column(nullable: true)]
      #[Groups(["group1", "group_type"])]
-    private ?bool $active = true;
+    private ?bool $isActive = true;
 
     /**
      * @var Collection<int, CaisseSuccursale>
@@ -160,12 +160,12 @@ class Surccursale
 
     public function isActive(): ?bool
     {
-        return $this->active;
+        return $this->isActive;
     }
 
-    public function setActive(?bool $active): static
+    public function setIsActive(?bool $active): static
     {
-        $this->active = $active;
+        $this->isActive = $active;
 
         return $this;
     }

@@ -48,6 +48,17 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
             ->getQuery()
             ->getOneOrNullResult();
     }
+    public function getUserByCodeType($entreprise): ?User
+    {
+        return $this->createQueryBuilder('u')
+        ->innerJoin('u.typeUser', 't')
+            ->where('t.code = :code')
+            ->andWhere('u.entreprise = :entreprise')
+            ->setParameter('code', "SADM")
+            ->setParameter('entreprise', $entreprise)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 
     /**
      * Trouve les utilisateurs actifs/inactifs

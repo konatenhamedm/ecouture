@@ -59,7 +59,7 @@ class ApiClientController extends ApiInterface
 
     #[Route('/entreprise', methods: ['GET'])]
     /**
-     * Retourne la liste des typeMesures d'une entreprise.
+     * Retourne la liste des clients d'une entreprise.
      * 
      */
     #[OA\Response(
@@ -78,7 +78,7 @@ class ApiClientController extends ApiInterface
             return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
         }
         try {
-            if ($this->getUser()->getType() == $typeUserRepository->findOneBy(['code' => 'ADM'])) {
+            if ($this->getUser()->getType() == $typeUserRepository->findOneBy(['code' => 'SADM'])) {
 
                 $clients = $clientRepository->findBy(
                     ['entreprise' => $this->getUser()->getEntreprise()],
@@ -150,8 +150,8 @@ class ApiClientController extends ApiInterface
      * Permet de créer un(e) client.
      */
     #[OA\Post(
-        summary: "Authentification admin",
-        description: "Génère un token JWT pour les administrateurs.",
+        summary: "Permet de créer un(e) client",
+        description: "Permet de créer un(e) client.",
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\MediaType(
@@ -212,8 +212,8 @@ class ApiClientController extends ApiInterface
 
     #[Route('/update/{id}', methods: ['PUT', 'POST'])]
     #[OA\Post(
-        summary: "Authentification admin",
-        description: "Génère un token JWT pour les administrateurs.",
+        summary: "Permet de mettre a jour un client.",
+        description: "Permet de mettre a jour un client.",
         requestBody: new OA\RequestBody(
             required: true,
             content: new OA\MediaType(

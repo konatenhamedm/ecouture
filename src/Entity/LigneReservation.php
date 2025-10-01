@@ -17,9 +17,7 @@ class LigneReservation
      #[Groups(["group1"])]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'ligneReservations')]
-     #[Groups(["group1"])]
-    private ?Modele $modele = null;
+
 
     #[ORM\Column]
      #[Groups(["group1"])]
@@ -28,21 +26,12 @@ class LigneReservation
     #[ORM\ManyToOne(inversedBy: 'ligneReservations')]
     private ?Reservation $reservation = null;
 
+    #[ORM\ManyToOne(inversedBy: 'ligneReservations')]
+    private ?ModeleBoutique $modele = null;
+
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getModele(): ?Modele
-    {
-        return $this->modele;
-    }
-
-    public function setModele(?Modele $modele): static
-    {
-        $this->modele = $modele;
-
-        return $this;
     }
 
     public function getQuantite(): ?int
@@ -65,6 +54,18 @@ class LigneReservation
     public function setReservation(?Reservation $reservation): static
     {
         $this->reservation = $reservation;
+
+        return $this;
+    }
+
+    public function getModele(): ?ModeleBoutique
+    {
+        return $this->modele;
+    }
+
+    public function setModele(?ModeleBoutique $modele): static
+    {
+        $this->modele = $modele;
 
         return $this;
     }

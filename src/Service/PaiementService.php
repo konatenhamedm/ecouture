@@ -3,14 +3,19 @@
 namespace App\Service;
 
 use App\Entity\Abonnement;
+use App\Entity\Boutique;
 use App\Entity\ModuleAbonnement;
 use App\Entity\Paiement;
 use App\Entity\PaiementAbonnement;
+use App\Entity\Surccursale;
 use App\Entity\User;
 use App\Repository\AbonnementRepository;
+use App\Repository\BoutiqueRepository;
 use App\Repository\ModuleAbonnementRepository;
 use App\Repository\PaiementAbonnementRepository;
 use App\Repository\PaysRepository;
+use App\Repository\SurccursaleRepository;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -33,7 +38,10 @@ class PaiementService
         private AbonnementRepository $abonnementRepository,
         private SendMailService $sendMailService,
         private AddCategorie $addCategorie,
-        private PaysRepository $paysRepository
+        private PaysRepository $paysRepository,
+        private UserRepository $userRepository,
+        private BoutiqueRepository $boutiqueRepository,
+        private SurccursaleRepository $surccursaleRepository
     ) {
 
         $this->apiKey = $params->get('API_KEY');
@@ -131,6 +139,9 @@ class PaiementService
     public function methodeWebHook(Request $request)
     {
 
+
+
+
         $data = json_decode($request->getContent(), true);
         $paiement = $this->paiementAbonnementRepository->findOneBy(['reference' => $data['referenceNumber']]);
 
@@ -198,13 +209,51 @@ class PaiementService
             'sms' => $nombreSms,
             'boutique' => $nombreBoutique
         ]);
+       
+        if ($paiement->getDataUser()) {
+            foreach ($paiement->getDataUser() as $user) {
+
+                $data = $this->userRepository->find($user);
+                $data->setIsActive(false);
+                $this->userRepository->add($data, true);
+            }
+        }
+        if ($paiement->getDataSuccursale()) {
+            foreach ($paiement->getDataSuccursale() as $succursale) {
+
+                $data = $this->surccursaleRepository->find($succursale);
+                $data->setIsActive(false);
+                $this->surccursaleRepository->add($data, true);
+            }
+        }
+        if ($paiement->getDataBoutique()) {
+            foreach ($paiement->getDataBoutique() as $boutique) {
+
+                $data = $this->boutiqueRepository->find($boutique);
+                $data->setIsActive(false);
+                $this->boutiqueRepository->add($data, true);
+            }
+        }
+
 
         $this->sendMailService->sendNotification([
             'libelle' => "Bienvenue dans notre application",
             'titre' => "Bienvenue",
             'entreprise' => $paiement->getEntreprise(),
-            'user' => "",
-            'userUpdate' => ""
+            'user' => $this->userRepository->getUserByCodeType($paiement->getEntreprise()->getId()),
+            'userUpdate' => $this->userRepository->getUserByCodeType($paiement->getEntreprise()->getId())
         ]);
+
+        $this->sendMailService->send(
+            'depps@myonmci.ci',
+            $paiement->getEntreprise()->getEmail(),
+            "Bienvenue dans notre application",
+            "bienvenue",
+            [
+                'abonnement' => $paiement->getModuleAbonnement(),
+                'user' => "",
+                'userUpdate' => ""
+            ]
+        );
     }
 }
