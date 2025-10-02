@@ -103,7 +103,7 @@ class PaiementService
                 'customerEmail'        => $data['email'],
                 'customerPhoneNumber'  => $data['numero'],
                 'description'          => 'Abonnement ' . $moduleAbonnement->getCode(),
-                'notificationURL'      => "https://webhook.site/524466d3-85ab-447f-bbfd-664c6fc91759", //$this->urlGenerator->generate('webhook_paiement', [], UrlGeneratorInterface::ABSOLUTE_URL),
+                'notificationURL'      => /* "https://webhook.site/524466d3-85ab-447f-bbfd-664c6fc91759", */ $this->urlGenerator->generate('webhook_paiement', [], UrlGeneratorInterface::ABSOLUTE_URL),
                 'returnURL'            => 'https://ton-site.com/paiement/retour',
                 'returnContext'        => http_build_query([
                     'paiement_id' => $paiement->getId(),
@@ -145,7 +145,7 @@ class PaiementService
     {
 
         $data = json_decode($request->getContent(), true);
-
+        $response = ['message' => 'OK', 'code' => 200];
         $path = __DIR__ . '/../../var/webhooks';
         if (!is_dir($path)) {
             mkdir($path, 0777, true);
@@ -163,6 +163,9 @@ class PaiementService
             $this->paiementAbonnementRepository->add($paiement, true);
             // JE dois mettre a jour l'abonnement
             $this->createAbonnement($data['referenceNumber']);
+
+           $response = ['message' => 'OK', 'code' => 200];
+           
         } else {
             $response = [
                 'message' => 'Echec',
