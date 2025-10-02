@@ -261,7 +261,7 @@ class ApiUserController extends ApiInterface
                     "nouvellesinscription",
                     [
                         "entreprise" =>   $entreprise->getLibelle(),
-                        "abonnement" => $module->getLibelle(),
+                        "abonnement" => $module->getCode(),
                         "date" => (new \DateTime())->format('d/m/Y H:i'),
                     ]
                 );
