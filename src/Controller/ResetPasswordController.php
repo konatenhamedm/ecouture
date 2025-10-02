@@ -84,7 +84,7 @@ class ResetPasswordController extends AbstractController
             $this->entityManager->flush();
 
             $sendMailService->send(
-                "support@ateliya.com",
+                "supports@ateliya.com",
                 $data['email'],
                 "Réinitialisation du mot de passe",
                 "otp",
