@@ -6,10 +6,10 @@
   <title>Code OTP</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f6f9fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #e6f8f9, #ffffff);
       margin: 0;
-      padding: 0;
+      padding: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -17,62 +17,81 @@
     }
 
     .card {
-      background: #ffffff;
-      border-radius: 16px;
-      box-shadow: 0px 4px 16px rgba(0,0,0,0.08);
-      max-width: 400px;
-      width: 90%;
-      padding: 30px 20px;
+      background: rgba(255,255,255,0.9);
+      border-radius: 20px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      max-width: 420px;
+      width: 100%;
+      padding: 40px 25px;
       text-align: center;
-      animation: fadeIn 0.8s ease-out;
+      backdrop-filter: blur(8px);
+      animation: fadeIn 0.7s ease-in-out;
+    }
+
+    .logo {
+      font-size: 28px;
+      font-weight: bold;
+      color: #53B0B7;
+      margin-bottom: 10px;
     }
 
     .card h2 {
       margin-bottom: 15px;
       color: #222;
-      font-size: 20px;
+      font-size: 22px;
+      font-weight: 600;
     }
 
     .otp {
       display: inline-block;
-      background: #eaf7f8;
-      border: 2px solid #53B0B7;
+      background: #53B0B7;
+      color: #fff;
       border-radius: 12px;
-      padding: 18px 30px;
-      font-size: 34px;
+      padding: 18px 32px;
+      font-size: 36px;
       font-weight: bold;
-      letter-spacing: 10px;
-      color: #53B0B7;
-      margin: 20px 0;
-      opacity: 0;
-      transform: scale(0.8);
+      letter-spacing: 12px;
+      margin: 25px 0;
       animation: popIn 0.8s ease-out forwards;
-      animation-delay: 0.3s;
     }
 
     .info {
       font-size: 15px;
-      color: #555;
+      color: #444;
       margin-top: 10px;
-      line-height: 1.5;
+      line-height: 1.6;
+    }
+
+    .btn {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 12px 22px;
+      background: #53B0B7;
+      color: #fff;
+      border-radius: 8px;
+      font-size: 14px;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+
+    .btn:hover {
+      background: #42949a;
     }
 
     .footer {
       margin-top: 25px;
       font-size: 13px;
-      color: #888;
+      color: #777;
     }
 
-    /* Animation fade-in du container */
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
+      from { opacity: 0; transform: translateY(15px); }
       to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Animation zoom + apparition du code OTP */
     @keyframes popIn {
-      0% { opacity: 0; transform: scale(0.8); }
-      60% { opacity: 1; transform: scale(1.05); }
+      0% { opacity: 0; transform: scale(0.7); }
+      70% { opacity: 1; transform: scale(1.1); }
       100% { opacity: 1; transform: scale(1); }
     }
 
@@ -80,22 +99,25 @@
       .otp {
         font-size: 28px;
         letter-spacing: 8px;
-        padding: 14px 20px;
+        padding: 14px 24px;
       }
     }
   </style>
 </head>
 <body>
   <div class="card">
+    <div class="logo">🔒 ATELIYA</div>
     <h2>Réinitialisation du mot de passe</h2>
     <p>Bonjour <b>{{ info_user.nom ? info_user.nom : info_user.login }}</b>,</p>
-    <p>Voici votre code OTP :</p>
+    <p>Voici votre code OTP sécurisé :</p>
 
-    <!-- OTP animé -->
-    <div class="otp">{{ otp_code }}</div>
+    <!-- OTP -->
+    <div class="otp">{{ otp.otp_code }}</div>
 
     <p class="info">⚠️ Ce code est valable <b>15 minutes</b>.<br>  
        Ne le partagez jamais avec personne.</p>
+
+    <a href="#" class="btn">Retourner à l’application</a>
 
     <div class="footer">
       © ATELIYA — Sécurité avant tout
