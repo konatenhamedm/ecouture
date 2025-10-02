@@ -92,7 +92,7 @@ class ResetPasswordController extends AbstractController
                     'otp_code' => $sixDigitCode,
                     "info_user" => [
                         "login" => $data['email'],
-                        "nom" => $user->getNom() . " " . $user->getPrenoms(),
+                        "nom" =>  $user->getNom()  && $user->getPrenoms() ? $user->getNom() . " " . $user->getPrenoms(): $user->getLogin(),
                     ]
                 ]
             );
