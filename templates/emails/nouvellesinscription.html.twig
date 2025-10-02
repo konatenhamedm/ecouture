@@ -7,77 +7,114 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f6f9fa;
+      background-color: #f5f7fa;
       margin: 0;
-      padding: 30px;
+      padding: 30px 15px;
     }
 
-    .card {
-      background: #ffffff;
-      border-radius: 12px;
-      box-shadow: 0px 4px 16px rgba(0,0,0,0.08);
-      max-width: 520px;
+    .container {
+      max-width: 600px;
       margin: auto;
-      padding: 25px 30px;
-      animation: fadeIn 0.8s ease-out;
+      background: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      overflow: hidden;
+      border: 1px solid #e6e9ec;
+      animation: fadeIn 0.7s ease-out;
     }
 
-    h2 {
-      color: #53B0B7;
-      margin-bottom: 15px;
-      font-size: 22px;
+    .header {
+      background: #f0f9fa;
+      padding: 20px;
       text-align: center;
+      border-bottom: 2px solid #53B0B7;
     }
 
-    .info {
-      margin: 20px 0;
-      font-size: 16px;
+    .header img {
+      max-width: 140px;
+      height: auto;
+      margin-bottom: 8px;
+    }
+
+    .header h1 {
+      margin: 5px 0 0;
+      font-size: 20px;
+      color: #53B0B7;
+    }
+
+    .content {
+      padding: 30px 25px;
+      font-size: 15px;
       color: #444;
       line-height: 1.6;
+    }
+
+    .content h2 {
+      font-size: 18px;
+      margin-bottom: 15px;
+      color: #222;
+      text-align: center;
     }
 
     .highlight {
       background: #eaf7f8;
       border: 1px solid #53B0B7;
       border-radius: 8px;
-      padding: 12px 18px;
-      font-size: 17px;
+      text-align: center;
+      padding: 15px;
+      margin: 20px 0;
+      font-size: 18px;
       font-weight: bold;
       color: #53B0B7;
-      margin: 10px 0;
-      text-align: center;
+    }
+
+    .details {
+      margin-top: 15px;
+      font-size: 15px;
+      color: #333;
+      line-height: 1.8;
     }
 
     .footer {
-      margin-top: 30px;
-      font-size: 13px;
       text-align: center;
+      font-size: 12px;
       color: #888;
+      padding: 15px;
+      border-top: 1px solid #e6e9ec;
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
+      from { opacity: 0; transform: translateY(15px); }
       to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h2>📢 Nouvelle inscription</h2>
-
-    <p class="info">
-      Une entreprise vient de s'inscrire sur ateliya :
-    </p>
-
-    <div class="highlight">
-      {{ entreprise }}
+  <div class="container">
+    <!-- HEADER -->
+    <div class="header">
+      <img src="https://via.placeholder.com/140x40?text=ATELIYA" alt="Logo Ateliya">
+      <h1>📢 Nouvelle inscription</h1>
     </div>
 
-    <p class="info">
-      ✅ <b>Formule choisie :</b> {{ abonnement }} <br>
-      🕒 <b>Date :</b> {{ date }}
-    </p>
+    <!-- CONTENT -->
+    <div class="content">
+      <h2>Une entreprise vient de rejoindre Ateliya 🎉</h2>
 
+      <p>Bienvenue à :</p>
+
+      <!-- Nom entreprise -->
+      <div class="highlight">
+        {{ entreprise }}
+      </div>
+
+      <div class="details">
+        ✅ <b>Formule choisie :</b> {{ abonnement }} <br>
+        🕒 <b>Date :</b> {{ date }}
+      </div>
+    </div>
+
+    <!-- FOOTER -->
     <div class="footer">
       Notification automatique — ATELIYA
     </div>

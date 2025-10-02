@@ -7,77 +7,117 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background-color: #f6f9fa;
+      background-color: #f5f7fa;
       margin: 0;
-      padding: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
+      padding: 30px 15px;
     }
 
-    .card {
+    .container {
+      max-width: 600px;
+      margin: auto;
       background: #ffffff;
-      border-radius: 16px;
-      box-shadow: 0px 4px 16px rgba(0,0,0,0.08);
-      max-width: 400px;
-      width: 90%;
-      padding: 30px 20px;
-      text-align: center;
-      animation: fadeIn 0.8s ease-out;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      overflow: hidden;
+      border: 1px solid #e6e9ec;
+      animation: fadeIn 0.7s ease-out;
     }
 
-    .card h2 {
+    .header {
+      background: #f0f9fa;
+      padding: 20px;
+      text-align: center;
+      border-bottom: 2px solid #53B0B7;
+    }
+
+    .header img {
+      max-width: 140px;
+      height: auto;
+      margin-bottom: 8px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 20px;
+      color: #53B0B7;
+    }
+
+    .content {
+      padding: 30px 25px;
+      font-size: 15px;
+      color: #444;
+      line-height: 1.6;
+      text-align: center;
+    }
+
+    .content h2 {
+      font-size: 20px;
       margin-bottom: 15px;
       color: #222;
-      font-size: 20px;
     }
 
     .vente {
-      display: inline-block;
       background: #eaf7f8;
-      border: 2px solid #53B0B7;
-      border-radius: 12px;
-      padding: 16px 24px;
-      font-size: 22px;
+      border: 1px solid #53B0B7;
+      border-radius: 8px;
+      text-align: center;
+      padding: 18px;
+      margin: 20px auto;
+      font-size: 20px;
       font-weight: bold;
       color: #53B0B7;
-      margin: 20px 0;
-      opacity: 0;
-      transform: scale(0.8);
-      animation: popIn 0.8s ease-out forwards;
-      animation-delay: 0.3s;
+      display: inline-block;
+      min-width: 220px;
+    }
+
+    .details {
+      margin-top: 15px;
+      font-size: 15px;
+      color: #333;
+      line-height: 1.8;
     }
 
     .footer {
-      margin-top: 25px;
-      font-size: 13px;
+      text-align: center;
+      font-size: 12px;
       color: #888;
+      padding: 15px;
+      border-top: 1px solid #e6e9ec;
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
+      from { opacity: 0; transform: translateY(15px); }
       to { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes popIn {
-      0% { opacity: 0; transform: scale(0.8); }
-      60% { opacity: 1; transform: scale(1.05); }
-      100% { opacity: 1; transform: scale(1); }
     }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h2>Nouveau paiement ✅</h2>
-    <p>Un nouveau paiement vient d’être effectuée dans le surccursale :</p>
+  <div class="container">
+    <!-- HEADER -->
+    <div class="header">
+      <img src="https://via.placeholder.com/140x40?text=ATELIYA" alt="Logo Ateliya">
+      <h1>💰 Notification de Vente</h1>
+    </div>
 
-    <div class="vente">{{ boutique_libelle }}</div>
+    <!-- CONTENT -->
+    <div class="content">
+      <h2>Nouveau paiement reçu ✅</h2>
+      <p>Un nouveau paiement vient d’être effectué dans la succursale :</p>
 
-    {% if montant is defined %}
-      <p><strong>Montant :</strong> {{ montant }} FCFA</p>
-    {% endif %}
+      <!-- Nom boutique -->
+      <div class="vente">
+        {{ boutique_libelle }}
+      </div>
 
+      <!-- Montant si disponible -->
+      {% if montant is defined %}
+      <div class="details">
+        💵 <strong>Montant :</strong> {{ montant }} FCFA
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- FOOTER -->
     <div class="footer">
       © ATELIYA — Gestion des ventes
     </div>
