@@ -203,7 +203,7 @@ class ApiModeleController extends ApiInterface
         $modele->setUpdatedBy($this->getUser());
         $errorResponse = $this->errorResponse($modele);
         if ($errorResponse !== null) {
-            return $errorResponse; // Retourne la réponse d'erreur si des erreurs sont présentes
+            return $errorResponse; 
         } else {
 
             $modeleRepository->add($modele, true);

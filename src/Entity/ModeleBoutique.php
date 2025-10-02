@@ -18,15 +18,15 @@ class ModeleBoutique
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-     #[Groups(["group1"])]
+     #[Groups(["group1","group_ligne"])]
     private ?int $id = null;
 
     #[ORM\Column]
-     #[Groups(["group1"])]
+     #[Groups(["group1","group_ligne"])]
     private ?int $quantite = null;
 
     #[ORM\Column(length: 255)]
-     #[Groups(["group1"])]
+     #[Groups(["group1","group_ligne"])]
     private ?string $prix = null;
 
     #[ORM\ManyToOne(inversedBy: 'modeleBoutiques')]

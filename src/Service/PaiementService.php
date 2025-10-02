@@ -28,6 +28,9 @@ class PaiementService
     private string $apiKey;
     private string $merchantId;
     private string $paiementUrl;
+    private string $sendMail;
+    private string $superAdmin;
+
     public function __construct(
         private ParameterBagInterface $params,
         private UrlGeneratorInterface $urlGenerator,
@@ -47,6 +50,8 @@ class PaiementService
         $this->apiKey = $params->get('API_KEY');
         $this->merchantId = $params->get('MERCHANT_ID');
         $this->paiementUrl = $params->get('PAIEMENT_URL');
+        $this->sendMail = $params->get('SEND_MAIL');
+        $this->superAdmin = $params->get('SUPER_ADMIN');
     }
 
     public function generateReference(string $code): string
@@ -98,7 +103,7 @@ class PaiementService
                 'customerEmail'        => $data['email'],
                 'customerPhoneNumber'  => $data['numero'],
                 'description'          => 'Abonnement ' . $moduleAbonnement->getCode(),
-                'notificationURL'      => $this->urlGenerator->generate('webhook_paiement', [], UrlGeneratorInterface::ABSOLUTE_URL),
+                'notificationURL'      => "https://webhook.site/524466d3-85ab-447f-bbfd-664c6fc91759", //$this->urlGenerator->generate('webhook_paiement', [], UrlGeneratorInterface::ABSOLUTE_URL),
                 'returnURL'            => 'https://ton-site.com/paiement/retour',
                 'returnContext'        => http_build_query([
                     'paiement_id' => $paiement->getId(),
@@ -139,10 +144,15 @@ class PaiementService
     public function methodeWebHook(Request $request)
     {
 
-
-
-
         $data = json_decode($request->getContent(), true);
+
+        $path = __DIR__ . '/../../var/webhooks';
+        if (!is_dir($path)) {
+            mkdir($path, 0777, true);
+        }
+
+        file_put_contents($path . '/webhook_' . date('Ymd_His') . '.json', json_encode($data, JSON_PRETTY_PRINT));
+
         $paiement = $this->paiementAbonnementRepository->findOneBy(['reference' => $data['referenceNumber']]);
 
         if ($data['responsecode'] == 0) {
@@ -209,7 +219,7 @@ class PaiementService
             'sms' => $nombreSms,
             'boutique' => $nombreBoutique
         ]);
-       
+
         if ($paiement->getDataUser()) {
             foreach ($paiement->getDataUser() as $user) {
 
@@ -237,22 +247,22 @@ class PaiementService
 
 
         $this->sendMailService->sendNotification([
-            'libelle' => "Bienvenue dans notre application",
-            'titre' => "Bienvenue",
+            'libelle' => sprintf("🎉 Bienvenue %s dans notre application !", $paiement->getEntreprise()->getLibelle()),
+            'titre'   => "Bienvenue parmi nous",
             'entreprise' => $paiement->getEntreprise(),
             'user' => $this->userRepository->getUserByCodeType($paiement->getEntreprise()->getId()),
             'userUpdate' => $this->userRepository->getUserByCodeType($paiement->getEntreprise()->getId())
         ]);
 
         $this->sendMailService->send(
-            'depps@myonmci.ci',
-            $paiement->getEntreprise()->getEmail(),
-            "Bienvenue dans notre application",
-            "bienvenue",
+            $this->sendMail,
+            $this->superAdmin,
+            "Nouveau abonnement - " . $paiement->getEntreprise(),
+            "abonnement",
             [
-                'abonnement' => $paiement->getModuleAbonnement(),
-                'user' => "",
-                'userUpdate' => ""
+                "entreprise" =>  $paiement->getEntreprise()->geLibelle(),
+                "abonnement" => $paiement->getModuleAbonnement()->getCode(),
+                "date" => (new \DateTime())->format('d/m/Y H:i'),
             ]
         );
     }

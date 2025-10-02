@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notification de Vente</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f6f9fa;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0px 4px 16px rgba(0,0,0,0.08);
+      max-width: 400px;
+      width: 90%;
+      padding: 30px 20px;
+      text-align: center;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    .card h2 {
+      margin-bottom: 15px;
+      color: #222;
+      font-size: 20px;
+    }
+
+    .vente {
+      display: inline-block;
+      background: #eaf7f8;
+      border: 2px solid #53B0B7;
+      border-radius: 12px;
+      padding: 16px 24px;
+      font-size: 22px;
+      font-weight: bold;
+      color: #53B0B7;
+      margin: 20px 0;
+      opacity: 0;
+      transform: scale(0.8);
+      animation: popIn 0.8s ease-out forwards;
+      animation-delay: 0.3s;
+    }
+
+    .footer {
+      margin-top: 25px;
+      font-size: 13px;
+      color: #888;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.8); }
+      60% { opacity: 1; transform: scale(1.05); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Nouveau paiement ✅</h2>
+    <p>Un nouveau paiement vient d’être effectuée dans le surccursale :</p>
+
+    <div class="vente">{{ boutique_libelle }}</div>
+
+    {% if montant is defined %}
+      <p><strong>Montant :</strong> {{ montant }} FCFA</p>
+    {% endif %}
+
+    <div class="footer">
+      © ATELIYA — Gestion des ventes
+    </div>
+  </div>
+</body>
+</html>

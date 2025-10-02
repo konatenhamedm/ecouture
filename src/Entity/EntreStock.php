@@ -14,23 +14,23 @@ class EntreStock
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-     #[Groups(["group1", "group_type"])]
+     #[Groups(["group1", "group_type","group_ligne"])]
     private ?int $id = null;
 
     #[ORM\Column(nullable: true)]
-     #[Groups(["group1", "group_type"])]
+     #[Groups(["group1", "group_type","group_ligne"])]
     private ?\DateTime $date = null;
 
     #[ORM\Column]
-     #[Groups(["group1", "group_type"])]
+     #[Groups(["group1", "group_type","group_ligne"])]
     private ?int $quantite = null;
 
     #[ORM\ManyToOne(inversedBy: 'entreStocks')]
-     #[Groups(["group1", "group_type"])]
+     #[Groups(["group1", "group_type",])]
     private ?Entreprise $entreprise = null;
 
     #[ORM\ManyToOne(inversedBy: 'entreStocks')]
-     #[Groups(["group1", "group_type"])]
+     #[Groups(["group1", "group_type","group_ligne"])]
     private ?Boutique $boutique = null;
 
     /**

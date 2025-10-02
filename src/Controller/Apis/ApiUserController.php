@@ -152,7 +152,7 @@ class ApiUserController extends ApiInterface
             content: new OA\JsonContent(
                 properties: [
 
-                    new OA\Property(property: "numero", type: "string"),
+                    new OA\Property(property: "email", type: "string"),
                     new OA\Property(property: "password", type: "string"),
                     new OA\Property(property: "confirmPassword", type: "string"),
                     new OA\Property(property: "denominationEntreprise", type: "string"),
@@ -170,7 +170,7 @@ class ApiUserController extends ApiInterface
     )]
     #[OA\Tag(name: 'user')]
     #[Security(name: 'Bearer')]
-    public function create(Request $request, AddCategorie $addCategorie,PaysRepository $paysRepository, SurccursaleRepository $surccursaleRepository, AbonnementRepository $abonnementRepository, ModuleAbonnementRepository $moduleAbonnementRepository, TypeUserRepository $typeUserRepository, UserRepository $userRepository, EntrepriseRepository $entrepriseRepository, SendMailService $sendMailService): Response
+    public function create(Request $request, AddCategorie $addCategorie, PaysRepository $paysRepository, SurccursaleRepository $surccursaleRepository, AbonnementRepository $abonnementRepository, ModuleAbonnementRepository $moduleAbonnementRepository, TypeUserRepository $typeUserRepository, UserRepository $userRepository, EntrepriseRepository $entrepriseRepository, SendMailService $sendMailService): Response
     {
 
         try {
@@ -179,7 +179,7 @@ class ApiUserController extends ApiInterface
 
             $data = json_decode($request->getContent(), true);
 
-            if ($userRepository->findOneBy(['login' => $data['numero']])) {
+            if ($userRepository->findOneBy(['login' => $data['email']])) {
                 return $this->errorResponse(null, "Ce numéro existe déjà ,veuillez utiliser  un autre");
             }
 
@@ -193,7 +193,7 @@ class ApiUserController extends ApiInterface
             $entreprise->setUpdatedAt(new \DateTime());
 
             $user = new User();
-            $user->setLogin($data['numero']);
+            $user->setLogin($data['email']);
             $user->setEntreprise($entreprise);
             $user->setIsActive(true);
             $user->setPassword($this->hasher->hashPassword($user,  $data['password']));
@@ -226,11 +226,11 @@ class ApiUserController extends ApiInterface
             $abonnement->setEtat("actif");
             $abonnement->setDateFin((new \DateTime())->modify('+' . $module->getDuree() . ' month'));
             $abonnement->setType('gratuit');
-       
+
             $errorResponse = $data['password'] !== $data['confirmPassword'] ?  $this->errorResponse($user, "Les mots de passe ne sont pas identiques") :  $this->errorResponse($user);
 
             if ($errorResponse !== null) {
-                return $errorResponse; // Retourne la réponse d'erreur si des erreurs sont présentes
+                return $errorResponse;
             } else {
 
                 $entrepriseRepository->add($entreprise, true);
@@ -243,7 +243,7 @@ class ApiUserController extends ApiInterface
                     'user' => $nombreUser,
                     'sms' => $nombreSms,
                     'boutique' => $nombreBoutique,
-                    'numero'=> $module->getNumero()
+                    'numero' => $module->getNumero()
                 ]);
 
                 $sendMailService->sendNotification([
@@ -253,6 +253,33 @@ class ApiUserController extends ApiInterface
                     'user' => $user,
                     'userUpdate' => $user
                 ]);
+
+                $this->sendMailService->send(
+                    $this->sendMail,
+                    $this->superAdmin,
+                    "Nouvelle inscription - " . $entreprise->getLibelle(),
+                    "nouvellesinscription",
+                    [
+                        "entreprise" =>   $entreprise->getLibelle(),
+                        "abonnement" => $module->getLibelle(),
+                        "date" => (new \DateTime())->format('d/m/Y H:i'),
+                    ]
+                );
+
+                $this->sendMailService->send(
+                    $this->sendMail,
+                    $data['email'],
+                    "Bienvenue dans notre application",
+                    "welcome_user",
+                    [
+                        "user" => [
+                            "nom" => $user->getNom() && $user->getPrenoms() ?  $user->getNom() . " " . $user->getPrenoms() : $user->getLogin(),
+                        ],
+                        "qr_code_url" => "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=https://monapp.com/download",
+                        "url_appstore" => "https://apps.apple.com/app/id123456789",
+                        "url_playstore" => "https://play.google.com/store/apps/details?id=com.monapp"
+                    ]
+                );
             }
 
             $response = $this->responseData($entreprise, 'group1', ['Content-Type' => 'application/json']);
@@ -328,7 +355,7 @@ class ApiUserController extends ApiInterface
 
             $errorResponse = $data['password'] !== $data['confirmPassword'] ?  $this->errorResponse($user, "Les mots de passe ne sont pas identiques") :  $this->errorResponse($user);
             if ($errorResponse !== null) {
-                return $errorResponse; // Retourne la réponse d'erreur si des erreurs sont présentes
+                return $errorResponse;
             } else {
 
                 $userRepository->add($user, true);

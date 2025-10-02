@@ -187,13 +187,15 @@ class ApiPaiementController extends ApiInterface
         ]
     )]
     #[OA\Tag(name: 'paiement')]
-    public function create(Request $request, Utils $utils, CaisseSuccursaleRepository $caisseSuccursaleRepository, Facture $facture, FactureRepository $factureRepository, PaiementFactureRepository $paiementRepository): Response
+    public function create(Request $request, UserRepository $userRepository, Utils $utils, CaisseSuccursaleRepository $caisseSuccursaleRepository, Facture $facture, FactureRepository $factureRepository, PaiementFactureRepository $paiementRepository): Response
     {
 
         if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
             return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
         }
         $data = json_decode($request->getContent(), true);
+        $admin = $userRepository->getUserByCodeType($this->getUser()->getEntreprise());
+
         $paiement = new PaiementFacture();
         $paiement->setMontant($data['montant']);
         $paiement->setFacture($facture);
@@ -212,12 +214,45 @@ class ApiPaiementController extends ApiInterface
 
         $errorResponse = $this->errorResponse($paiement);
         if ($errorResponse !== null) {
-            return $errorResponse; // Retourne la réponse d'erreur si des erreurs sont présentes
+            return $errorResponse;
         } else {
 
             $paiementRepository->add($paiement, true);
             $factureRepository->add($facture, true);
             $caisseSuccursaleRepository->add($caisse, true);
+
+            $this->sendMailService->sendNotification([
+                'entreprise' => $this->getUser()->getEntreprise(),
+                "user" => $admin,
+                "libelle" => sprintf(
+                    "Bonjour %s,\n\n" .
+                        "Nous vous informons qu'un nouveau paiement vient d'être enregistrée dans le surccursale **%s**.\n\n" .
+                        "- Montant : %s\n" .
+                        "- Effectuée par : %s\n" .
+                        "- Date : %s\n\n" .
+                        "Cordialement,\nVotre application de gestion.",
+                    $admin->getLogin(),
+                    $this->getUser()->getSurccursale(),
+                    $data['montant'] ?? "Non spécifié",
+                    $this->getUser()->getNom() && $this->getUser()->getPrenoms() ? $this->getUser()->getNom() . " " . $this->getUser()->getPrenoms() : $this->getUser()->getLogin(),
+
+                    (new \DateTime())->format('d/m/Y H:i')
+                ),
+                "titre" => "Paiemnet facture - " . $this->getUser()->getSurccursale(),
+
+            ]);
+
+            $this->sendMailService->send(
+                $this->sendMail,
+                $this->superAdmin,
+                "Paiement facture - " . $this->getUser()->getEntreprise(),
+                "paiement_email",
+                [
+                    "boutique_libelle" => $this->getUser()->getEntreprise(),
+                    "montant" => $data['montant'],
+                    "date" => (new \DateTime())->format('d/m/Y H:i'),
+                ]
+            );
         }
 
         return  $this->responseDataWith_([
@@ -251,14 +286,15 @@ class ApiPaiementController extends ApiInterface
         ]
     )]
     #[OA\Tag(name: 'paiement')]
-    public function paiementBoutiqueModele(Request $request, Utils $utils,ModeleBoutiqueRepository $modeleBoutiqueRepository, CaisseBoutiqueRepository $caisseBoutiqueRepository, BoutiqueRepository $boutiqueRepository,  FactureRepository $factureRepository, PaiementFactureRepository $paiementRepository): Response
+    public function paiementBoutiqueModele(Request $request, UserRepository $userRepository, Utils $utils, ModeleBoutiqueRepository $modeleBoutiqueRepository, CaisseBoutiqueRepository $caisseBoutiqueRepository, BoutiqueRepository $boutiqueRepository,  FactureRepository $factureRepository, PaiementFactureRepository $paiementRepository): Response
     {
 
         if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
             return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
         }
-
+        $admin = $userRepository->getUserByCodeType($this->getUser()->getEntreprise());
         $data = json_decode($request->getContent(), true);
+        $boutique = $boutiqueRepository->findOneBy(['id' => $data['boutiqueId']]);
         $paiement = new PaiementBoutique();
         $paiement->setMontant($data['montant']);
         $paiement->setType(Paiement::TYPE["paiementBoutique"]);
@@ -276,7 +312,7 @@ class ApiPaiementController extends ApiInterface
 
         $errorResponse = $this->errorResponse($paiement);
         if ($errorResponse !== null) {
-            return $errorResponse; 
+            return $errorResponse;
         } else {
             $modeleBoutique = $modeleBoutiqueRepository->findOneBy(['id' => $data['modeleBoutiqueId']]);
             $modeleBoutique->setQuantite((int)$modeleBoutique->getQuantite() - (int)$data['quantite']);
@@ -284,12 +320,44 @@ class ApiPaiementController extends ApiInterface
             $paiementRepository->add($paiement, true);
 
             $caisseBoutiqueRepository->add($caisse, true);
+
+            $this->sendMailService->sendNotification([
+                'entreprise' => $this->getUser()->getEntreprise(),
+                "user" => $admin,
+                "libelle" => sprintf(
+                    "Bonjour %s,\n\n" .
+                        "Nous vous informons qu'une nouvelle vente vient d'être enregistrée dans la boutique **%s**.\n\n" .
+                        "- Montant : %s\n" .
+                        "- Effectuée par : %s\n" .
+                        "- Date : %s\n\n" .
+                        "Cordialement,\nVotre application de gestion.",
+                    $admin->getLogin(),
+                    $boutique->getLibelle(),
+                    $data['montant'] ?? "Non spécifié",
+                    $this->getUser()->getNom() && $this->getUser()->getPrenoms() ? $this->getUser()->getNom() . " " . $this->getUser()->getPrenoms() : $this->getUser()->getLogin(),
+                    (new \DateTime())->format('d/m/Y H:i')
+                ),
+                "titre" => "Vente - " . $boutique->getLibelle(),
+
+            ]);
+
+            $this->sendMailService->send(
+                $this->sendMail,
+                $this->superAdmin,
+                "Vente - " . $this->getUser()->getEntreprise(),
+                "vente_email",
+                [
+                    "boutique_libelle" => $this->getUser()->getEntreprise(),
+                    "montant" => $data['montant'],
+                    "date" => (new \DateTime())->format('d/m/Y H:i'),
+                ]
+            );
         }
 
         return  $this->responseDataWith_([
             'data' => $paiement,
-           /*  'inactiveSubscriptions' => $inactiveSubscriptions */
-        ], 'group1', ['Content-Type' => 'application/json']);;
+            /*  'inactiveSubscriptions' => $inactiveSubscriptions */
+        ], 'group1', ['Content-Type' => 'application/json']);
     }
 
     #[Route('/webhook', name: 'webhook_paiement', methods: ['POST'])]
@@ -300,8 +368,6 @@ class ApiPaiementController extends ApiInterface
 
         return  $this->responseData($response, 'group1', ['Content-Type' => 'application/json']);
     }
-
-
 
     #[Route('/delete/{id}',  methods: ['DELETE'])]
     /**
@@ -326,9 +392,7 @@ class ApiPaiementController extends ApiInterface
         try {
 
             if ($paiement != null) {
-
                 $villeRepository->remove($paiement, true);
-
                 // On retourne la confirmation
                 $this->setMessage("Operation effectuées avec success");
                 $response = $this->response($paiement);

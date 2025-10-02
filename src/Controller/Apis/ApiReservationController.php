@@ -223,7 +223,7 @@ class ApiReservationController extends ApiInterface
         }
         $errorResponse = $this->errorResponse($reservation);
         if ($errorResponse !== null) {
-            return $errorResponse; // Retourne la réponse d'erreur si des erreurs sont présentes
+            return $errorResponse; 
         } else {
 
 

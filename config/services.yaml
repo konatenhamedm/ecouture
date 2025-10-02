@@ -10,6 +10,8 @@ parameters:
     API_KEY: '%env(API_KEY)%'
     MERCHANT_ID: '%env(MERCHANT_ID)%'
     PAIEMENT_URL: '%env(PAIEMENT_URL)%'
+    SEND_MAIL: '%env(SEND_MAIL)%'
+    SUPER_ADMIN: '%env(SUPER_ADMIN)%'
 
 services:
     _defaults:
@@ -25,6 +27,13 @@ services:
             $merchantId: '%env(PAIEMENT_MERCHANT_ID)%'
             $apiKey: '%env(PAIEMENT_API_KEY)%'
             $paiementUrl: '%env(PAIEMENT_URL)%'
+            $sendMail: '%env(SEND_MAIL)%'
+            $superAdmin: '%env(SUPER_ADMIN)%'
+
+    App\Controller\Apis\Config\ApiInterface:
+        arguments:
+            $sendMail: '%send_mail%'
+            $superAdmin: '%super_admin%'
 
     App\helpers\laravel_helper: ~
     # Déclaration ABSOLUMENT EXPLICITE

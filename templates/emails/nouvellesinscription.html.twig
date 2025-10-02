@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nouveau Abonnement</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f6f9fa;
+      margin: 0;
+      padding: 30px;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0px 4px 16px rgba(0,0,0,0.08);
+      max-width: 520px;
+      margin: auto;
+      padding: 25px 30px;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    h2 {
+      color: #53B0B7;
+      margin-bottom: 15px;
+      font-size: 22px;
+      text-align: center;
+    }
+
+    .info {
+      margin: 20px 0;
+      font-size: 16px;
+      color: #444;
+      line-height: 1.6;
+    }
+
+    .highlight {
+      background: #eaf7f8;
+      border: 1px solid #53B0B7;
+      border-radius: 8px;
+      padding: 12px 18px;
+      font-size: 17px;
+      font-weight: bold;
+      color: #53B0B7;
+      margin: 10px 0;
+      text-align: center;
+    }
+
+    .footer {
+      margin-top: 30px;
+      font-size: 13px;
+      text-align: center;
+      color: #888;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>📢 Nouvelle inscription</h2>
+
+    <p class="info">
+      Une entreprise vient de s'inscrire sur ateliya :
+    </p>
+
+    <div class="highlight">
+      {{ entreprise }}
+    </div>
+
+    <p class="info">
+      ✅ <b>Formule choisie :</b> {{ abonnement }} <br>
+      🕒 <b>Date :</b> {{ date }}
+    </p>
+
+    <div class="footer">
+      Notification automatique — ATELIYA
+    </div>
+  </div>
+</body>
+</html>

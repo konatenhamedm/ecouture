@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Code OTP</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f6f9fa;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0px 4px 16px rgba(0,0,0,0.08);
+      max-width: 400px;
+      width: 90%;
+      padding: 30px 20px;
+      text-align: center;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    .card h2 {
+      margin-bottom: 15px;
+      color: #222;
+      font-size: 20px;
+    }
+
+    .otp {
+      display: inline-block;
+      background: #eaf7f8;
+      border: 2px solid #53B0B7;
+      border-radius: 12px;
+      padding: 18px 30px;
+      font-size: 34px;
+      font-weight: bold;
+      letter-spacing: 10px;
+      color: #53B0B7;
+      margin: 20px 0;
+      opacity: 0;
+      transform: scale(0.8);
+      animation: popIn 0.8s ease-out forwards;
+      animation-delay: 0.3s;
+    }
+
+    .info {
+      font-size: 15px;
+      color: #555;
+      margin-top: 10px;
+      line-height: 1.5;
+    }
+
+    .footer {
+      margin-top: 25px;
+      font-size: 13px;
+      color: #888;
+    }
+
+    /* Animation fade-in du container */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Animation zoom + apparition du code OTP */
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.8); }
+      60% { opacity: 1; transform: scale(1.05); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    @media only screen and (max-width: 620px) {
+      .otp {
+        font-size: 28px;
+        letter-spacing: 8px;
+        padding: 14px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Réinitialisation du mot de passe</h2>
+    <p>Bonjour <b>{{ info_user.nom ? info_user.nom : info_user.login }}</b>,</p>
+    <p>Voici votre code OTP :</p>
+
+    <!-- OTP animé -->
+    <div class="otp">{{ otp_code }}</div>
+
+    <p class="info">⚠️ Ce code est valable <b>15 minutes</b>.<br>  
+       Ne le partagez jamais avec personne.</p>
+
+    <div class="footer">
+      © ATELIYA — Sécurité avant tout
+    </div>
+  </div>
+</body>
+</html>

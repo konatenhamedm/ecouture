@@ -201,7 +201,7 @@ class ApiClientController extends ApiInterface
         $client->setUpdatedBy($this->getUser());
         $errorResponse = $this->errorResponse($client);
         if ($errorResponse !== null) {
-            return $errorResponse; // Retourne la réponse d'erreur si des erreurs sont présentes
+            return $errorResponse; 
         } else {
 
             $clientRepository->add($client, true);
@@ -262,7 +262,7 @@ class ApiClientController extends ApiInterface
                 $errorResponse = $this->errorResponse($client);
 
                 if ($errorResponse !== null) {
-                    return $errorResponse; // Retourne la réponse d'erreur si des erreurs sont présentes
+                    return $errorResponse; 
                 } else {
                     $clientRepository->add($client, true);
                 }

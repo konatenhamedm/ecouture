@@ -211,7 +211,7 @@ class ApiFactureController extends ApiInterface
     )]
     #[OA\Tag(name: 'facture')]
     #[Security(name: 'Bearer')]
-    public function create(Request $request, CaisseSuccursaleRepository $caisseSuccursaleRepository, Utils $utils, TypeMesureRepository $typeMesureRepository, ClientRepository $clientRepository, CategorieMesureRepository $categorieMesureRepository, FactureRepository $factureRepository, EntrepriseRepository $entrepriseRepository): Response
+    public function create(Request $request,UserRepository $userRepository, CaisseSuccursaleRepository $caisseSuccursaleRepository, Utils $utils, TypeMesureRepository $typeMesureRepository, ClientRepository $clientRepository, CategorieMesureRepository $categorieMesureRepository, FactureRepository $factureRepository, EntrepriseRepository $entrepriseRepository): Response
     {
         if ($this->subscriptionChecker->getActiveSubscription($this->getUser()->getEntreprise()) == null) {
             return $this->errorResponseWithoutAbonnement('Abonnement requis pour cette fonctionnalité');
@@ -222,6 +222,7 @@ class ApiFactureController extends ApiInterface
         $filePath = $this->getUploadDir(self::UPLOAD_PATH, true);
         $data = json_decode($request->getContent(), true);
         $facture = new Facture();
+        $admin = $userRepository->getUserByCodeType($this->getUser()->getEntreprise());
 
         if ($request->get('clientId') == null) {
             $client = new Client();
@@ -313,10 +314,43 @@ class ApiFactureController extends ApiInterface
 
             $caisse->setMontant((int)$caisse->getMontant() + (int)$request->get('avance'));
             $caisse->setType('caisse_succursale');
+
+                   $this->sendMailService->sendNotification([
+                'entreprise' => $this->getUser()->getEntreprise(),
+                "user" => $admin,
+                "libelle" => sprintf(
+                    "Bonjour %s,\n\n" .
+                        "Nous vous informons qu'un nouveau paiement vient d'être enregistrée dans le surccursale **%s**.\n\n" .
+                        "- Montant : %s\n" .
+                        "- Effectuée par : %s\n" .
+                        "- Date : %s\n\n" .
+                        "Cordialement,\nVotre application de gestion.",
+                    $admin->getLogin(),
+                    $this->getUser()->getSurccursale(),
+                    $data['montant'] ?? "Non spécifié",
+                    $this->getUser()->getNom() && $this->getUser()->getPrenoms() ? $this->getUser()->getNom() . " " . $this->getUser()->getPrenoms() : $this->getUser()->getLogin(),
+                    (new \DateTime())->format('d/m/Y H:i')
+                ),
+                "titre" => "Paiemnet facture - " . $this->getUser()->getSurccursale(),
+
+            ]);
+
+
+            $this->sendMailService->send(
+                $this->sendMail,
+                $this->superAdmin,
+                "Paiement facture - " . $this->getUser()->getEntreprise(),
+                "paiement_email",
+                  [
+                    "boutique_libelle" => $this->getUser()->getEntreprise(),
+                    "montant" => $data['montant'],
+                    "date" => (new \DateTime())->format('d/m/Y H:i'),
+                ]
+            );
         }
 
         if ($errorResponse !== null) {
-            return $errorResponse; // Retourne la réponse d'erreur si des erreurs sont présentes
+            return $errorResponse; 
         } else {
 
             $factureRepository->add($facture, true);

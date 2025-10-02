@@ -125,8 +125,8 @@ class ApiAbonnementController extends ApiInterface
             new OA\Response(response: 401, description: "Invalid credentials")
         ]
     )]
-    #[OA\Tag(name: 'paiement')]
-    public function createAbonnement(Request $request, PaiementService $paiementService, AbonnementRepository $abonnementRepository, Utils $utils, ModuleAbonnement $moduleAbonnement, FactureRepository $factureRepository, PaiementFactureRepository $paiementRepository)
+    #[OA\Tag(name: 'abonnement')]
+    public function createAbonnement(Request $request,UserRepository $userRepository, PaiementService $paiementService, AbonnementRepository $abonnementRepository, Utils $utils, ModuleAbonnement $moduleAbonnement, FactureRepository $factureRepository, PaiementFactureRepository $paiementRepository)
     {
         
         $data = json_decode($request->getContent(), true);

@@ -131,7 +131,7 @@ class ApiTypeUserController extends ApiInterface
         $typeUser->setUpdatedBy($this->getuser());
         $errorResponse = $this->errorResponse($typeUser);
         if ($errorResponse !== null) {
-            return $errorResponse; // Retourne la réponse d'erreur si des erreurs sont présentes
+            return $errorResponse; 
         } else {
 
             $typeUserRepository->add($typeUser, true);
@@ -175,7 +175,7 @@ class ApiTypeUserController extends ApiInterface
                 $errorResponse = $this->errorResponse($typeUser);
 
                 if ($errorResponse !== null) {
-                    return $errorResponse; // Retourne la réponse d'erreur si des erreurs sont présentes
+                    return $errorResponse; 
                 } else {
                     $typeUserRepository->add($typeUser, true);
                 }

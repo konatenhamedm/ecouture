@@ -187,7 +187,7 @@ class ApiBoutiqueController extends ApiInterface
         $boutique->setUpdatedBy($this->getUser());
         $errorResponse = $this->errorResponse($boutique);
         if ($errorResponse !== null) {
-            return $errorResponse; // Retourne la réponse d'erreur si des erreurs sont présentes
+            return $errorResponse; 
         } else {
 
             $boutiqueRepository->add($boutique, true);
@@ -247,7 +247,7 @@ class ApiBoutiqueController extends ApiInterface
                 $errorResponse = $this->errorResponse($boutique);
 
                 if ($errorResponse !== null) {
-                    return $errorResponse; // Retourne la réponse d'erreur si des erreurs sont présentes
+                    return $errorResponse; 
                 } else {
                     $boutiqueRepository->add($boutique, true);
                 }

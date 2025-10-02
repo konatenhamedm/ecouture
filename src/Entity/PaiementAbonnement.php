@@ -24,14 +24,17 @@ class PaiementAbonnement extends Paiement
     #[ORM\Column(length: 255)]
     private ?string $pays = null;
 
-    #[ORM\Column(type: Types::ARRAY, nullable: true)]
-    private ?array $dataUser = null;
+   
+    #[ORM\Column(type: "json")]
+    private ?array $dataUser = [];
 
-    #[ORM\Column(type: Types::ARRAY, nullable: true)]
-    private ?array $dataSuccursale = null;
+    
+    #[ORM\Column(type: "json")]
+    private ?array $dataSuccursale = [];
 
-    #[ORM\Column(type: Types::ARRAY, nullable: true)]
-    private ?array $dataBoutique = null;
+
+    #[ORM\Column(type: "json")]
+    private ?array $dataBoutique = [];
 
     public function getModuleAbonnement(): ?ModuleAbonnement
     {

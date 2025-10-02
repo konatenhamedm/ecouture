@@ -165,7 +165,7 @@ class ApiModuleAbonnementController extends ApiInterface
         }
 
         if ($errorResponse !== null) {
-            return $errorResponse; // Retourne la réponse d'erreur si des erreurs sont présentes
+            return $errorResponse; 
         } else {
 
             $moduleAbonnementRepository->add($moduleAbonnement, true);
@@ -278,7 +278,7 @@ class ApiModuleAbonnementController extends ApiInterface
                 }
 
                 if ($errorResponse !== null) {
-                    return $errorResponse; // Retourne la réponse d'erreur si des erreurs sont présentes
+                    return $errorResponse; 
                 } else {
                     $moduleAbonnementRepository->add($moduleAbonnement, true);
                 }

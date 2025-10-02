@@ -211,7 +211,7 @@ class ApiPaysController extends ApiInterface
                 $errorResponse = $this->errorResponse($pays);
 
                 if ($errorResponse !== null) {
-                    return $errorResponse; // Retourne la réponse d'erreur si des erreurs sont présentes
+                    return $errorResponse; 
                 } else {
                     $paysRepository->add($pays, true);
                 }

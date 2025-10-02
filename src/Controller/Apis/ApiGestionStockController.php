@@ -3,8 +3,10 @@
 namespace  App\Controller\Apis;
 
 use App\Controller\Apis\Config\ApiInterface;
+use App\Entity\Boutique;
 use App\Entity\EntreStock;
 use App\Entity\LigneEntre;
+use App\Entity\ModeleBoutique;
 use App\Repository\BoutiqueRepository;
 use App\Repository\EntreStockRepository;
 use App\Repository\LigneEntreRepository;
@@ -21,6 +23,75 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 #[Route('/api/stock')]
 class ApiGestionStockController extends ApiInterface
 {
+
+    #[Route('/{id}', methods: ['GET'])]
+    /**
+     * Retourne la liste des entreés et sorties de stock d'une boutique.
+     * 
+     */
+    #[OA\Response(
+        response: 200,
+        description: "Retourne la liste des entreés et sorties de stock d'une boutique",
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: EntreStock::class, groups: ['full']))
+        )
+    )]
+    #[OA\Tag(name: 'modele')]
+    // #[Security(name: 'Bearer')]
+    public function index(ModeleRepository $modeleRepository, EntreStockRepository $entreStockRepository, Boutique $boutique): Response
+    {
+        try {
+            $entrees = $entreStockRepository->findBy(
+                ['boutique' => $boutique->getId()],
+                ['id' => 'ASC']
+            );
+
+            $response =  $this->responseData($entrees, 'group1', ['Content-Type' => 'application/json']);
+        } catch (\Exception $exception) {
+            $this->setMessage("");
+            $response = $this->response('[]');
+        }
+
+        // On envoie la réponse
+        return $response;
+    }
+
+    #[Route('/modeleBoutique/{id}', methods: ['GET'])]
+    /**
+     * Retourne la liste des lignes entrées et sorties de stock d'un modeleBoutique.
+     * 
+     */
+    #[OA\Response(
+        response: 200,
+        description: 'Returns the rewards of an user',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: LigneEntre::class, groups: ['full']))
+        )
+    )]
+    #[OA\Tag(name: 'stock')]
+    // #[Security(name: 'Bearer')]
+    public function indexModeleBoutique(ModeleRepository $modeleRepository, LigneEntreRepository $ligneEntreRepository,  ModeleBoutique $modeleBoutique): Response
+    {
+        try {
+
+
+            $entrees = $ligneEntreRepository->findBy(
+                ['modele' => $modeleBoutique->getId()],
+                ['id' => 'ASC']
+            );
+
+            $response =  $this->responseData($entrees, 'group_ligne', ['Content-Type' => 'application/json']);
+        } catch (\Exception $exception) {
+            $this->setMessage("");
+            $response = $this->response('[]');
+        }
+
+        // On envoie la réponse
+        return $response;
+    }
+
 
     #[Route('/entree',  methods: ['POST'])]
     /**

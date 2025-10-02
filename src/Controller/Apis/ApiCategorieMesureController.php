@@ -178,7 +178,7 @@ class ApiCategorieMesureController extends ApiInterface
         $categorieMesure->setUpdatedBy($this->getUser());
         $errorResponse = $this->errorResponse($categorieMesure);
         if ($errorResponse !== null) {
-            return $errorResponse; // Retourne la réponse d'erreur si des erreurs sont présentes
+            return $errorResponse; 
         } else {
 
             $moduleRepository->add($categorieMesure, true);
@@ -226,7 +226,7 @@ class ApiCategorieMesureController extends ApiInterface
                 $errorResponse = $this->errorResponse($categorieMesure);
 
                 if ($errorResponse !== null) {
-                    return $errorResponse; // Retourne la réponse d'erreur si des erreurs sont présentes
+                    return $errorResponse; 
                 } else {
                     $moduleRepository->add($categorieMesure, true);
                 }

@@ -216,7 +216,7 @@ class ApiSurccursaleController extends ApiInterface
         $surccursale->setUpdatedBy($this->getUser());
         $errorResponse = $this->errorResponse($surccursale);
         if ($errorResponse !== null) {
-            return $errorResponse; // Retourne la réponse d'erreur si des erreurs sont présentes
+            return $errorResponse; 
         } else {
 
 
@@ -279,7 +279,7 @@ class ApiSurccursaleController extends ApiInterface
                 $errorResponse = $this->errorResponse($surccursale);
 
                 if ($errorResponse !== null) {
-                    return $errorResponse; // Retourne la réponse d'erreur si des erreurs sont présentes
+                    return $errorResponse; 
                 } else {
                     $surccursaleRepository->add($surccursale, true);
                 }

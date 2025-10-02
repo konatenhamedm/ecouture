@@ -246,7 +246,7 @@ class ApiTypeMesureController extends ApiInterface
      
 
         if ($errorResponse !== null) {
-            return $errorResponse; // Retourne la réponse d'erreur si des erreurs sont présentes
+            return $errorResponse; 
         } else {
 
             $typeMesureRepository->add($typeMesure, true);
@@ -354,7 +354,7 @@ class ApiTypeMesureController extends ApiInterface
                 
 
                 if ($errorResponse !== null) {
-                    return $errorResponse; // Retourne la réponse d'erreur si des erreurs sont présentes
+                    return $errorResponse; 
                 } else {
                     $typeMesureRepository->add($typeMesure, true);
                 }

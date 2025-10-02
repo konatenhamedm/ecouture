@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Télécharger notre application</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f6f9fa;
+      margin: 0;
+      padding: 30px;
+    }
+
+    .card {
+      background: #ffffff;
+      border-radius: 12px;
+      box-shadow: 0px 4px 16px rgba(0,0,0,0.08);
+      max-width: 520px;
+      margin: auto;
+      padding: 25px 30px;
+      text-align: center;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    h2 {
+      color: #53B0B7;
+      margin-bottom: 15px;
+      font-size: 22px;
+    }
+
+    .info {
+      margin: 15px 0;
+      font-size: 15px;
+      color: #555;
+      line-height: 1.6;
+    }
+
+    .qr-code {
+      margin: 20px 0;
+    }
+
+    .stores {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    .stores img {
+      height: 50px;
+    }
+
+    .footer {
+      margin-top: 25px;
+      font-size: 13px;
+      color: #888;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Bienvenue 👋</h2>
+
+    <p class="info">
+      Bonjour <b>{{ user.nom }}</b>, merci pour votre inscription !  
+      Pour profiter de toutes nos fonctionnalités, téléchargez notre application mobile :
+    </p>
+
+    <!-- QR Code -->
+    <div class="qr-code">
+      <img src="{{ qr_code_url }}" alt="QR Code" width="150">
+    </div>
+
+    <!-- Boutons Store -->
+    <div class="stores">
+      <a href="{{ url_appstore }}">
+        <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Télécharger sur App Store">
+      </a>
+      <a href="{{ url_playstore }}">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_FR.svg" alt="Disponible sur Google Play">
+      </a>
+    </div>
+
+    <div class="footer">
+      © DEPPS — Votre application de confiance 🚀
+    </div>
+  </div>
+</body>
+</html>

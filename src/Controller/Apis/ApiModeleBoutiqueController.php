@@ -219,21 +219,23 @@ class ApiModeleBoutiqueController extends ApiInterface
 
         $data = json_decode($request->getContent(), true);
 
-
+        $modele = $modeleRepository->find($data['modele']);
         $modeleBoutique = new ModeleBoutique();
         $modeleBoutique->setPrix($data['prix']);
         $modeleBoutique->setQuantite($data['quantite']);
         $modeleBoutique->setBoutique($boutiqueRepository->find($data['boutique']));
-        $modeleBoutique->setModele($modeleRepository->find($data['modele']));
+        $modeleBoutique->setModele($modele);
 
         $modeleBoutique->setCreatedBy($this->getUser());
         $modeleBoutique->setUpdatedBy($this->getUser());
         $errorResponse = $this->errorResponse($modeleBoutique);
         if ($errorResponse !== null) {
-            return $errorResponse; // Retourne la réponse d'erreur si des erreurs sont présentes
+            return $errorResponse; 
         } else {
 
             $modeleBoutiqueRepository->add($modeleBoutique, true);
+            $modele->setQuantiteGlobale($modele->getQuantiteGlobale() + $modeleBoutique->getQuantite());
+            $modeleRepository->add($modele, true);
         }
 
         return $this->responseData($modeleBoutique, 'group1', ['Content-Type' => 'application/json']);
@@ -248,7 +250,7 @@ class ApiModeleBoutiqueController extends ApiInterface
             content: new OA\JsonContent(
                 properties: [
                     new OA\Property(property: "prix", type: "string"),
-                    new OA\Property(property: "qauntite", type: "string"),
+                   /*  new OA\Property(property: "qauntite", type: "string"), */
                     new OA\Property(property: "modele", type: "string"),
                     new OA\Property(property: "boutique", type: "string"),
 
@@ -272,22 +274,20 @@ class ApiModeleBoutiqueController extends ApiInterface
 
             if ($modeleBoutique != null) {
 
+                $modele = $modeleRepository->find($data->modele);
                 $modeleBoutique->setPrix($data->prix);
-                $modeleBoutique->setQuantite($data->quantite);
+                /* $modeleBoutique->setQuantite($data->quantite); */
                 $modeleBoutique->setBoutique($boutiqueRepository->find($data->boutique));
-                $modeleBoutique->setModele($modeleRepository->find($data->modele));
+                $modeleBoutique->setModele($modele);
                 $modeleBoutique->setUpdatedBy($this->getUser());
                 $modeleBoutique->setUpdatedAt(new \DateTime());
                 $errorResponse = $this->errorResponse($modeleBoutique);
 
                 if ($errorResponse !== null) {
-                    return $errorResponse; // Retourne la réponse d'erreur si des erreurs sont présentes
+                    return $errorResponse; 
                 } else {
                     $modeleBoutiqueRepository->add($modeleBoutique, true);
                 }
-
-
-
                 // On retourne la confirmation
                 $response = $this->responseData($modeleBoutique, 'group1', ['Content-Type' => 'application/json']);
             } else {

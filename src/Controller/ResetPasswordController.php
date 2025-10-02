@@ -6,6 +6,8 @@ namespace App\Controller;
 
 use App\Controller\Apis\Config\ApiInterface;
 use App\Entity\User;
+use App\Service\SendMailService;
+use App\Service\Utils;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -50,7 +52,7 @@ class ResetPasswordController extends AbstractController
         ]
     )]
     #[OA\Tag(name: 'auth')]
-    public function request(Request $request): JsonResponse
+    public function request(Request $request, SendMailService $sendMailService): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
         $email = $data['email'] ?? null;
@@ -79,9 +81,21 @@ class ResetPasswordController extends AbstractController
 
             $user->setPlainResetToken($sixDigitCode);
             $user->setPlainTokenExpiresAt(new \DateTimeImmutable('+15 minutes'));
-
             $this->entityManager->flush();
 
+            $sendMailService->send(
+                "support@ateliya.com",
+                $data['email'],
+                "Réinitialisation du mot de passe",
+                "otp",
+                [
+                    'otp_code' => $sixDigitCode,
+                    "info_user" => [
+                        "login" => $data['email'],
+                        "nom" => $user->getNom() . " " . $user->getPrenoms(),
+                    ]
+                ]
+            );
         } catch (\Exception $e) {
             return $this->json(
                 ['message' => 'Une erreur est survenue lors de la génération du code de réinitialisation.'],
@@ -91,7 +105,7 @@ class ResetPasswordController extends AbstractController
 
         return $this->json([
             'message' => 'Vous avez demandé une réinitialisation de mot de passe. Si l\'email existe, un code de réinitialisation a été envoyé.',
-            'token' => $sixDigitCode 
+            'token' => $sixDigitCode
         ]);
     }
 

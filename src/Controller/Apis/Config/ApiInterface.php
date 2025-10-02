@@ -10,6 +10,7 @@ use App\Repository\SurccursaleRepository;
 use App\Repository\UserRepository;
 use App\Service\Menu;
 use App\Service\PaginationService;
+use App\Service\SendMailService;
 use App\Service\SubscriptionChecker;
 use App\Service\Utils;
 use Doctrine\ORM\EntityManagerInterface;
@@ -29,7 +30,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\Component\String\Slugger\SluggerInterface;
-
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 class ApiInterface extends AbstractController
 {
@@ -54,9 +55,13 @@ class ApiInterface extends AbstractController
 
     protected $serializer;
 
+    protected $sendMail ;
+    protected $superAdmin ;
+
     public function __construct(
         EntityManagerInterface $em,
         SluggerInterface $slugger,
+        protected SendMailService $sendMailService,
         SubscriptionChecker $subscriptionChecker,
         Utils $utils,
         UserPasswordHasherInterface $hasher,
@@ -68,6 +73,8 @@ class ApiInterface extends AbstractController
         ValidatorInterface $validator,
         UserRepository $userRepository,
         protected PaginationService $paginationService,
+       #[Autowire(param: 'SEND_MAIL')] string $sendMail,
+        #[Autowire(param: 'SUPER_ADMIN')] string $superAdmin
     ) {
 
         $this->client = $client;
@@ -82,6 +89,9 @@ class ApiInterface extends AbstractController
         $this->boutiqueRepository = $boutiqueRepository;
         $this->succursaleRe = $surccursaleRepository;
         $this->settingRepository = $settingRepository;
+        $this->sendMail = $sendMail;
+        $this->superAdmin = $superAdmin;
+
     }
 
     public function allParametres($type)
