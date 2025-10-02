@@ -98,7 +98,7 @@ class ResetPasswordController extends AbstractController
             );
         } catch (\Exception $e) {
             return $this->json(
-                ['message' => 'Une erreur est survenue lors de la génération du code de réinitialisation.'],
+                ['message' => $e->getMessage()],
                 Response::HTTP_BAD_REQUEST
             );
         }
