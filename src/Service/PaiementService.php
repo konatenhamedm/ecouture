@@ -150,31 +150,31 @@ class PaiementService
     public function methodeWebHook(Request $request)
     {
 
-        $data = json_decode($request->getContent(), true);
-
+        $data = json_decode($request->getContent());
+/* 
         $file= fopen(dirname(__FILE__).'/paiement.log', 'w+');
         $data = file_get_contents('php://input');
-        fwrite($file, $data);
+        fwrite($file, $data); */
 
      
-        $paiement = $this->paiementAbonnementRepository->findOneBy(['reference' => "ABNT251004173013002"]);
+        $paiement = $this->paiementAbonnementRepository->findOneBy(['reference' => $data->referenceNumber]);
 
-       /*  if ($data['responsecode'] == 0) { */
+        if ($data->responsecode == 0) {
             $paiement->setState(1);
 
-            $paiement->setChannel("waaa");
+            $paiement->setChannel($data->channel);
             //$transaction->setData(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
             $this->paiementAbonnementRepository->add($paiement, true);
             // JE dois mettre a jour l'abonnement
-            $this->createAbonnement("ABNT251004173013002");
+            $this->createAbonnement($data->referenceNumber);
 
             $response = ['message' => 'OK', 'code' => 200];
-        /* } else {
+        } else {
             $response = [
                 'message' => 'Echec',
                 'code' => 400
             ];
-        } */
+        }
 
 
         return $response;
