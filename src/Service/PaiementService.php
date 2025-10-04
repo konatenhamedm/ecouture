@@ -103,6 +103,7 @@ class PaiementService
                 'countryCurrencyCode'  => '952',
                 'currency'             => 'XOF',
                 'customerId'           => (string) $user->getId(),
+                'hashcode'             => 'hashcode',
                 'customerFirstName'    => $entreprise->getLibelle(),
                 'customerLastname'     => $entreprise->getLibelle(),
                 'customerEmail'        => $data['email'],
