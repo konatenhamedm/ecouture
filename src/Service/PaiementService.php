@@ -69,6 +69,7 @@ class PaiementService
         $paiement = new PaiementAbonnement();
         $paiement->setMontant($moduleAbonnement->getMontant());
         $paiement->setModuleAbonnement($moduleAbonnement);
+        $paiement->setEntreprise($this->userRepository->find($data['entrepriseId']));
         $paiement->setCreatedAtValue(new \DateTime());
         $reference = $this->generateReference('ABNT');
         $paiement->setReference($reference);
