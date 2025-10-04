@@ -11,6 +11,7 @@ use App\Entity\Surccursale;
 use App\Entity\User;
 use App\Repository\AbonnementRepository;
 use App\Repository\BoutiqueRepository;
+use App\Repository\EntrepriseRepository;
 use App\Repository\ModuleAbonnementRepository;
 use App\Repository\PaiementAbonnementRepository;
 use App\Repository\PaysRepository;
@@ -44,7 +45,8 @@ class PaiementService
         private PaysRepository $paysRepository,
         private UserRepository $userRepository,
         private BoutiqueRepository $boutiqueRepository,
-        private SurccursaleRepository $surccursaleRepository
+        private SurccursaleRepository $surccursaleRepository,
+        private EntrepriseRepository $entrepriseRepository
     ) {
 
         $this->apiKey = $params->get('API_KEY');
@@ -67,9 +69,11 @@ class PaiementService
     public function traiterPaiement($data = [], User $user, ModuleAbonnement $moduleAbonnement): array
     {
         $paiement = new PaiementAbonnement();
+
+        $entreprise = $this->entrepriseRepository->find($data['entrepriseId']);
         $paiement->setMontant($moduleAbonnement->getMontant());
         $paiement->setModuleAbonnement($moduleAbonnement);
-        $paiement->setEntreprise($this->userRepository->find($data['entrepriseId']));
+        $paiement->setEntreprise($entreprise);
         $paiement->setCreatedAtValue(new \DateTime());
         $reference = $this->generateReference('ABNT');
         $paiement->setReference($reference);
@@ -99,8 +103,8 @@ class PaiementService
                 'countryCurrencyCode'  => '952',
                 'currency'             => 'XOF',
                 'customerId'           => (string) $user->getId(),
-                'customerFirstName'    => $this->userRepository->find($data['entrepriseId'])->getLibelle(),
-                'customerLastname'     => $this->userRepository->find($data['entrepriseId'])->getLibelle(),
+                'customerFirstName'    => $entreprise->getLibelle(),
+                'customerLastname'     => $entreprise->getLibelle(),
                 'customerEmail'        => $data['email'],
                 'customerPhoneNumber'  => $data['numero'],
                 'description'          => 'Abonnement ' . $moduleAbonnement->getCode(),
