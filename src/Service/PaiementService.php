@@ -150,14 +150,12 @@ class PaiementService
     {
 
         $data = json_decode($request->getContent(), true);
-        $response = ['message' => 'OK', 'code' => 200];
-        $path = __DIR__ . '/../../var/webhooks';
-        if (!is_dir($path)) {
-            mkdir($path, 0777, true);
-        }
 
-        file_put_contents($path . '/webhook_' . date('Ymd_His') . '.json', json_encode($data, JSON_PRETTY_PRINT));
+        $file= fopen(dirname(__FILE__).'/paiement.log', 'w+');
+        $data = file_get_contents('php://input');
+        fwrite($file, $data);
 
+     
         $paiement = $this->paiementAbonnementRepository->findOneBy(['reference' => $data['referenceNumber']]);
 
         if ($data['responsecode'] == 0) {
