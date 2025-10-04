@@ -98,12 +98,12 @@ class PaiementService
                 'countryCurrencyCode'  => '952',
                 'currency'             => 'XOF',
                 'customerId'           => (string) $user->getId(),
-                'customerFirstName'    => $data['entrepriseDenomination'],
-                'customerLastname'     => $data['entrepriseDenomination'],
+                'customerFirstName'    => $this->userRepository->find($data['entrepriseId'])->getLibelle(),
+                'customerLastname'     => $this->userRepository->find($data['entrepriseId'])->getLibelle(),
                 'customerEmail'        => $data['email'],
                 'customerPhoneNumber'  => $data['numero'],
                 'description'          => 'Abonnement ' . $moduleAbonnement->getCode(),
-                'notificationURL'      => /* "https://webhook.site/524466d3-85ab-447f-bbfd-664c6fc91759", */ $this->urlGenerator->generate('webhook_paiement', [], UrlGeneratorInterface::ABSOLUTE_URL),
+                'notificationURL'      => "https://back.ateliya.com/api/paiement/webhook",  //$this->urlGenerator->generate('webhook_paiement', [], UrlGeneratorInterface::ABSOLUTE_URL),
                 'returnURL'            => 'https://ton-site.com/paiement/retour',
                 'returnContext'        => http_build_query([
                     'paiement_id' => $paiement->getId(),
@@ -164,8 +164,7 @@ class PaiementService
             // JE dois mettre a jour l'abonnement
             $this->createAbonnement($data['referenceNumber']);
 
-           $response = ['message' => 'OK', 'code' => 200];
-           
+            $response = ['message' => 'OK', 'code' => 200];
         } else {
             $response = [
                 'message' => 'Echec',

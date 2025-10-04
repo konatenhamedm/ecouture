@@ -114,7 +114,7 @@ class ApiAbonnementController extends ApiInterface
                     ),
 
                     new OA\Property(property: "email", type: "string"),
-                    new OA\Property(property: "entrepriseDenomination", type: "string"),
+                    new OA\Property(property: "entrepriseId", type: "string"),
                     new OA\Property(property: "numero", type: "string"),
                     new OA\Property(property: "operateur", type: "string"),
                 ],
@@ -136,7 +136,7 @@ class ApiAbonnementController extends ApiInterface
             'dataBoutique' => $data['dataBoutique'],
             'dataSuccursale' => $data['dataSuccursale'],
             'email' => $data['email'],
-            'entrepriseDenomination' => $data['entrepriseDenomination'],
+            'entrepriseId' => $data['entrepriseId'],
             'numero' => $data['numero'],
             'operateur' => $data['operateur'],
         ], $this->getUser(), $moduleAbonnement);
