@@ -157,16 +157,16 @@ class PaiementService
         fwrite($file, $data);
 
      
-        $paiement = $this->paiementAbonnementRepository->findOneBy(['reference' => $data['referenceNumber']]);
+        $paiement = $this->paiementAbonnementRepository->findOneBy(['reference' => "ABNT251004173013002"]);
 
        /*  if ($data['responsecode'] == 0) { */
             $paiement->setState(1);
 
-            $paiement->setChannel($data['channel']);
+            $paiement->setChannel("waaa");
             //$transaction->setData(json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
             $this->paiementAbonnementRepository->add($paiement, true);
             // JE dois mettre a jour l'abonnement
-            $this->createAbonnement($data['referenceNumber']);
+            $this->createAbonnement("ABNT251004173013002");
 
             $response = ['message' => 'OK', 'code' => 200];
         /* } else {
