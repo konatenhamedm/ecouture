@@ -158,7 +158,7 @@ class PaiementService
      
         $paiement = $this->paiementAbonnementRepository->findOneBy(['reference' => $data['referenceNumber']]);
 
-        if ($data['responsecode'] == 0) {
+       /*  if ($data['responsecode'] == 0) { */
             $paiement->setState(1);
 
             $paiement->setChannel($data['channel']);
@@ -168,12 +168,12 @@ class PaiementService
             $this->createAbonnement($data['referenceNumber']);
 
             $response = ['message' => 'OK', 'code' => 200];
-        } else {
+        /* } else {
             $response = [
                 'message' => 'Echec',
                 'code' => 400
             ];
-        }
+        } */
 
 
         return $response;
