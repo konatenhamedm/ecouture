@@ -38,6 +38,17 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 class ApiUserController extends ApiInterface
 {
 
+
+    #[Route('/qr-code', name: 'qr_code')]
+    public function generateQrCode(): Response
+    {
+       
+        
+        return $this->render('emails/welcome_user.html.twig', [
+           
+        ]);
+    }
+
     #[Route('/', methods: ['GET'])]
     /**
      * Retourne la liste des users.
